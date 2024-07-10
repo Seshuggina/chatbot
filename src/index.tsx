@@ -1,15 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import FlowDiagram from './FlowDiagram';
+import 'reactjs-popup/dist/index.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <h3 className='text-center'>Data Flow Diagram</h3>
+    <FlowDiagram/>
   </React.StrictMode>
 );
 

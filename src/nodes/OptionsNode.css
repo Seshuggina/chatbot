@@ -1,0 +1,67 @@
+.sub-option-section {
+  border: 1px solid #898989;
+  border-radius: 2px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.sub-option-header {
+  padding: 8px 10px;
+  font-weight: 500;
+  background-color: #e8e9f1;
+  border-bottom: 1px solid #898989;
+}
+.sub-option-body {
+  padding: 10px 10px;
+}
+.sub-option-body > div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.sub-option-body > div label {
+  line-height: 1;
+}
+
+.sub-option-body > div input {
+  width: calc(100% - 21px);
+  margin-top: 1px;
+}
+
+.popup-content {
+  padding: 0 !important;
+}
+.flow-edit-pop {
+  h4 {
+    padding: 5px 15px;
+  }
+}
+.optionsEditPopUpContainer {
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  /* padding-bottom: 75px; */
+  /* padding-left: 10px;
+  padding-right: 10px; */
+}
+.flow-edit-pop {
+  overflow: hidden;
+}
+
+.sub-section {
+  padding: 10px;
+  border: 1px solid #999;
+}
+
+.popup-header {
+  border-bottom: 1px solid #ddd;
+}
+
+.save-fixed-bottom {
+  /* position: fixed; */
+  bottom: 40px;
+  background-color: white;
+  padding-left: 20px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

@@ -1,0 +1,23 @@
+.custom-node {
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.custom-node .custom-node-header {
+  padding: 5px 10px;
+  font-weight: 500;
+  background-color: #e8e9f1;
+  border-bottom: 1px solid #ccc;
+}
+.custom-node .custom-node-body {
+  padding: 8px 10px;
+  font-weight: 500;
+}
+.custom-node .custom-node-body input {
+  padding: 5px 8px;
+  font-weight: 500;
+}
+
+.custom-node-body > div {
+    display: flex;
+    flex-direction: column;
+}
