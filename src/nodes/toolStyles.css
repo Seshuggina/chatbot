@@ -1,12 +1,13 @@
 .custom-node {
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 3px solid #21ca3f;
 }
 .custom-node .custom-node-header {
   padding: 5px 10px;
   font-weight: 500;
   background-color: #e8e9f1;
   border-bottom: 1px solid #ccc;
+  min-width: 150px;
 }
 .custom-node .custom-node-body {
   padding: 8px 10px;

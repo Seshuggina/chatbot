@@ -11,8 +11,6 @@ import ReactFlow, {
   Controls,
   Background,
   ReactFlowProvider,
-  isNode,
-  isEdge,
   getIncomers,
   getOutgoers,
   getConnectedEdges,
@@ -20,6 +18,14 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import "./styles/button.scss";
 import "./App.scss";
+import { validateOptions } from "./services/validation";
+import ValidationMessages from "./component/ValidationMessages";
+import { generateChatbotFlow } from "./services/chatbot-flow";
+import {
+  ReactFlowNode,
+  ReactFlowEdge,
+  ReactFlowData,
+} from "./models/common.models";
 
 //Nodes
 import MessageNode from "./nodes/MessageNode";
@@ -29,9 +35,13 @@ import LeadFlowNode from "./nodes/LeadFlowNode";
 import GPTHandlerNode from "./nodes/GPTHandlerNode";
 import StopNode from "./nodes/StopNode";
 import StartNode from "./nodes/StartNode";
+import FileNode from "./nodes/FileNode";
 
 //Edges
 import CustomEdge from "./edges/CustomEdge";
+import { saveDraft, saveVersion } from "./services/save";
+import FlowDropdown from "./component/FlowDropdown";
+import Toolbar from "./component/Toolbar"; // Import the Toolbar component
 
 const nodeTypes = {
   start: StartNode,
@@ -41,10 +51,11 @@ const nodeTypes = {
   leadFlow: LeadFlowNode,
   gptHandler: GPTHandlerNode,
   stop: StopNode,
+  file: FileNode,
 };
 
 const edgeTypes = {
-  custom: CustomEdge, // Add the custom edge
+  custom: CustomEdge,
 };
 
 const initialNodes: Node[] = [
@@ -59,6 +70,8 @@ const initialNodes: Node[] = [
 const FlowDiagram: React.FC = () => {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showErrors, setShowErrors] = useState<boolean>(false);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) =>
@@ -70,11 +83,6 @@ const FlowDiagram: React.FC = () => {
       setEdges((eds) => applyEdgeChanges(changes, eds)),
     []
   );
-
-  // const onConnect = useCallback(
-  //   (params: any) => setEdges((eds) => addEdge(params, eds)),
-  //   []
-  // );
 
   const onConnect = (params: any) =>
     setEdges((eds) => addEdge({ ...params, type: "custom" }, eds));
@@ -100,10 +108,13 @@ const FlowDiagram: React.FC = () => {
         id: (nodes.length + 1).toString(),
         type,
         position,
-        data: {
-          text: "",
-          options: [
-            {
+        data: { text: "" }, // Default data for all nodes
+
+        // Set data field based on type
+        ...(type === "options" && {
+          data: {
+            text: "",
+            options: {
               displayText: "",
               propertyName: "",
               message: "",
@@ -116,8 +127,8 @@ const FlowDiagram: React.FC = () => {
                 },
               ],
             },
-          ],
-        },
+          },
+        }),
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -126,62 +137,58 @@ const FlowDiagram: React.FC = () => {
   );
 
   const handleSave = () => {
-    const flow = {
+    if (nodes.length < 2) {
+      const newErrors: Record<string, string> = {};
+      newErrors.MinNodes = "Minimum 2 nodes required for a valid flow";
+      setErrors(newErrors);
+      setShowErrors(true);
+      return false;
+    }
+    for (const nodeDetails of nodes) {
+      if (nodeDetails.type === "options") {
+        const errors = validateOptions(nodeDetails.data.options);
+        if (Object.keys(errors).length > 0) {
+          setErrors(errors);
+          console.log("errors", errors);
+          return;
+        }
+      }
+    }
+
+    const flow: ReactFlowData = {
       nodes,
       edges,
     };
     console.log("Saved Flow:", JSON.stringify(flow, null, 2));
+    const flowData = generateChatbotFlow(flow);
+    saveDraft(flow);
+    saveVersion(flow, flowData);
   };
 
   const handleNodeChange = (id: string, newData: any, nodeType: string) => {
-    let updatedNode = nodes.find((nds) => nds.id === id);
-    let updatedObject = {};
-    if (updatedNode) {
-      if (nodeType === "options") {
-        updatedObject = {
-          ...updatedNode,
+    const updatedNodes = nodes.map((node) => {
+      if (node.id === id) {
+        return {
+          ...node,
           data: {
-            ...updatedNode?.data,
-            options: newData,
-          },
-        };
-      } else {
-        updatedObject = {
-          ...updatedNode,
-          data: {
-            ...updatedNode?.data,
-            text: newData,
+            ...node.data,
+            ...(nodeType === "options"
+              ? { options: newData }
+              : { text: newData }),
           },
         };
       }
-
-      const updatedNodes = nodes.map((item) => {
-        if (item.id === id) {
-          return { ...item, ...updatedObject };
-        } else {
-          return item;
-        }
-      });
-      setNodes(updatedNodes);
-    }
-    console.log("updatedObject", nodes);
-
-    // setNodes((nds) =>
-    //   nds.map((node) =>
-    //     node.id === id
-    //       ? {
-    //           ...node,
-    //           data: {
-    //             ...node.data,
-    //             ...(nodeType === "options"
-    //               ? { options: newData.options }
-    //               : { text: newData.text }),
-    //           },
-    //         }
-    //       : node
-    //   )
-    // );
+      return node;
+    });
+    setNodes(updatedNodes);
     console.log("updated Nodes", nodes);
+  };
+
+  const handleDeleteNode = (id: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== id));
+    setEdges((eds) =>
+      eds.filter((edge) => edge.source !== id && edge.target !== id)
+    );
   };
 
   const onNodesDelete = useCallback(
@@ -211,70 +218,19 @@ const FlowDiagram: React.FC = () => {
     [nodes, edges]
   );
 
+  const renderSelectedFlow = () => {};
+
+  const onDragStart = (
+    event: React.DragEvent<HTMLButtonElement>,
+    nodeType: string
+  ) => {
+    event.dataTransfer.setData("application/reactflow", nodeType);
+  };
+
   return (
     <>
       <div className="flow-diagram">
-        <div className="toolbar">
-          <div className="">
-            <button
-              className="button"
-              onDragStart={(event) =>
-                event.dataTransfer.setData("application/reactflow", "message")
-              }
-              draggable
-            >
-              Message
-            </button>
-            <button
-              className="button"
-              onDragStart={(event) =>
-                event.dataTransfer.setData("application/reactflow", "options")
-              }
-              draggable
-            >
-              Options
-            </button>
-            <button
-              className="button"
-              onDragStart={(event) =>
-                event.dataTransfer.setData("application/reactflow", "leadForm")
-              }
-              draggable
-            >
-              Lead Form
-            </button>
-            <button
-              className="button"
-              onDragStart={(event) =>
-                event.dataTransfer.setData("application/reactflow", "leadFlow")
-              }
-              draggable
-            >
-              Lead Flow
-            </button>
-            <button
-              className="button"
-              onDragStart={(event) =>
-                event.dataTransfer.setData(
-                  "application/reactflow",
-                  "gptHandler"
-                )
-              }
-              draggable
-            >
-              GPT Handler
-            </button>
-            <button
-              className="button"
-              onDragStart={(event) =>
-                event.dataTransfer.setData("application/reactflow", "stop")
-              }
-              draggable
-            >
-              Stop
-            </button>
-          </div>
-        </div>
+        <Toolbar onDragStart={onDragStart} />
         <div
           className="reactflow-wrapper"
           onDrop={onDrop}
@@ -284,7 +240,11 @@ const FlowDiagram: React.FC = () => {
             <ReactFlow
               nodes={nodes.map((node) => ({
                 ...node,
-                data: { ...node.data, handleChange: handleNodeChange },
+                data: {
+                  ...node.data,
+                  handleChange: handleNodeChange,
+                  onDelete: handleDeleteNode,
+                },
               }))}
               edges={edges}
               onNodesChange={onNodesChange}
@@ -293,6 +253,7 @@ const FlowDiagram: React.FC = () => {
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               onNodesDelete={onNodesDelete}
+              fitView
             >
               <MiniMap />
               <Controls />
@@ -302,19 +263,30 @@ const FlowDiagram: React.FC = () => {
         </div>
       </div>
       <div className="action-flow-wrap">
-        <div className="">
-          Versions:{" "}
-          <select>
-            <option></option>
-            <option>Version 1</option>
-            <option>Version 2</option>
-          </select>
-          <button className="button-primary" onClick={handleSave}>
-            Deploy
-          </button>
+        <div className="d-flex">
+          <FlowDropdown dropdownChange={renderSelectedFlow} />
         </div>
+
+        {showErrors && (
+          <div className="alert alert-danger alert-close" role="alert">
+            <button
+              data-dismiss="alert"
+              aria-label="close"
+              title="close"
+              onClick={() => setShowErrors(false)}
+            >
+              &times;
+            </button>
+
+            <ValidationMessages messages={errors} />
+          </div>
+        )}
         <div className="">
-          <button className="button-primary" onClick={handleSave}>
+          <button
+            disabled={showErrors}
+            className="btn btn-primary"
+            onClick={handleSave}
+          >
             Save
           </button>
         </div>

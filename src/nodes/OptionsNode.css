@@ -9,6 +9,9 @@
   font-weight: 500;
   background-color: #e8e9f1;
   border-bottom: 1px solid #898989;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .sub-option-body {
   padding: 10px 10px;
@@ -36,12 +39,9 @@
     padding: 5px 15px;
   }
 }
-.optionsEditPopUpContainer {
+.popup-content .modal-body{
   max-height: calc(100vh - 120px);
   overflow: auto;
-  /* padding-bottom: 75px; */
-  /* padding-left: 10px;
-  padding-right: 10px; */
 }
 .flow-edit-pop {
   overflow: hidden;

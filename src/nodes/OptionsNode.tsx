@@ -3,6 +3,7 @@ import { Handle, Position, NodeProps } from "reactflow";
 import Popup from "reactjs-popup";
 import "./OptionsNode.css";
 import EditOptionsOnPopUp from "./EditOptions";
+import { validateOptions } from "./../services/validation";
 
 interface SubOption {
   title: string;
@@ -23,32 +24,20 @@ interface Option {
 }
 
 const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
-  // Popup
+  const optionsInput = data.options;
   const [open, setOpen] = useState(false);
-  const closeModal = () => setOpen(false);
-  // End of popup
-
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [options, setOptions] = useState<Option>({
-    displayText: "",
-    propertyName: "",
-    message: "",
-    subOptions: [
-      {
-        title: "",
-        subTitle: "",
-        value: "",
-        leadEmail: {
-          to: "",
-          cc: "",
-        },
-        isCollapsed: false,
-      },
-    ],
-  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [options, setOptions] = useState<Option>(optionsInput);
+
+  const closeModal = () => setOpen(false);
 
   const handleInputChange = (field: keyof Option, value: string) => {
     const newOptions = { ...options, [field]: value };
+    const newErrors = validateOptions(newOptions);
+    console.log("newErrors", newErrors);
+    
+    setErrors(newErrors);
     setOptions(newOptions);
     data.handleChange(id, newOptions, "options");
   };
@@ -62,13 +51,10 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
     if (field === "leadEmail" && typeof value !== "string") {
       newSubOptions[optionIndex][field] = value as { to: string; cc: string };
     } else if (typeof value === "string") {
-      newSubOptions[optionIndex][field] = value as never; // TypeScript workaround
+      newSubOptions[optionIndex][field] = value as never;
     }
-    setOptions({
-      ...options,
-      subOptions: newSubOptions,
-    });
     const newOptions = { ...options, subOptions: newSubOptions };
+    setOptions(newOptions);
     data.handleChange(id, newOptions, "options");
   };
 
@@ -77,7 +63,6 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
       title: "",
       subTitle: "",
       value: "",
-      id: Math.random().toString(36).substring(2, 9),
       leadEmail: {
         to: "",
         cc: "",
@@ -111,30 +96,35 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
     data.handleChange(id, { ...options, subOptions: newSubOptions }, "options");
   };
 
-  const togglePopup = (e: any) => {
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    setOpen(true);
+  const savedPopupData = (modifiedOptions: Option) => {
+    setOptions(modifiedOptions);
+    data.handleChange(id, modifiedOptions, "options");
   };
 
-  const closeModel = () => {
-    
-  };
-
-  const savedPopupData = (modifiedOptions: SubOption) => {
-    console.log("popUpEditedData", modifiedOptions);
+  const onDelete = (id: any) => {
+    data.onDelete(id);
   };
 
   return (
     <>
       <div className="custom-node">
-        <div
-          className="custom-node-header d-flex justify-content-between"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          Options
-          <button title="expand" onClick={() => setOpen((o) => !o)}>
+        <div className="custom-node-header d-flex justify-content-between align-items-center">
+          <strong
+            className="cursor-pointer"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            {" "}
+            Options
+          </strong>
+          <button title="Expand" onClick={() => setOpen((o) => !o)}>
             &#10063;
+          </button>
+          <button
+            title="Delete Option Node"
+            className="closeButton remove-node"
+            onClick={() => onDelete(id)}
+          >
+            &times;
           </button>
         </div>
         {!isCollapsed && (
@@ -172,11 +162,16 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
             </div>
             {options.subOptions.map((subOption, index) => (
               <div key={index} className="sub-option-section">
-                <div
-                  className="sub-option-header"
-                  onClick={() => toggleSubOption(index)}
-                >
-                  {subOption.title || "Add Options"}
+                <div className="sub-option-header">
+                  <strong onClick={() => toggleSubOption(index)}>
+                    {subOption.title || "Add Options"}
+                  </strong>
+
+                  {options.subOptions.length > 1 && (
+                    <button onClick={() => handleDeleteSubOption(index)}>
+                      Delete
+                    </button>
+                  )}
                 </div>
                 {!subOption.isCollapsed && (
                   <div className="sub-option-body">
@@ -240,23 +235,16 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                         }
                       />
                     </div>
-                    {options.subOptions.length > 1 && (
-                      <button onClick={() => handleDeleteSubOption(index)}>
-                        Delete
-                      </button>
-                    )}
                   </div>
                 )}
               </div>
             ))}
             <button onClick={handleAddSubOption}>Add</button>
-            {/* <button onClick={handleSave}>Save</button> */}
           </div>
         )}
         <Handle type="source" position={Position.Bottom} />
         <Handle type="target" position={Position.Top} />
       </div>
-      {/* {open && ( */}
       <Popup open={open} closeOnDocumentClick onClose={closeModal}>
         <EditOptionsOnPopUp
           save={savedPopupData}
@@ -264,7 +252,6 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
           close={closeModal}
         />
       </Popup>
-      {/* )} */}
     </>
   );
 };

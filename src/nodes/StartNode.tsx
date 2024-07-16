@@ -7,7 +7,6 @@ const StartNode: React.FC<NodeProps> = ({ data }) => {
     <div className="custom-node message-node">
       <div className="custom-node-body">{data.text}</div>
       <Handle type="source" position={Position.Bottom} />
-      <Handle type="target" position={Position.Top} />
     </div>
   );
 };
