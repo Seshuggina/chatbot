@@ -22,12 +22,7 @@
   margin-bottom: 10px;
 }
 
-.sub-option-body > div label {
-  line-height: 1;
-}
-
 .sub-option-body > div input {
-  width: calc(100% - 21px);
   margin-top: 1px;
 }
 

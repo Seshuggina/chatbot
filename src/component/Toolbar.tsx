@@ -1,7 +1,10 @@
 import React from "react";
 
 interface ToolbarProps {
-  onDragStart: (event: React.DragEvent<HTMLButtonElement>, nodeType: string) => void;
+  onDragStart: (
+    event: React.DragEvent<HTMLButtonElement>,
+    nodeType: string
+  ) => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ onDragStart }) => (
@@ -48,6 +51,13 @@ const Toolbar: React.FC<ToolbarProps> = ({ onDragStart }) => (
         draggable
       >
         File
+      </button>
+      <button
+        className="button"
+        onDragStart={(event) => onDragStart(event, "map")}
+        draggable
+      >
+        Maps
       </button>
       <button
         className="button"

@@ -36,7 +36,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
     const newOptions = { ...options, [field]: value };
     const newErrors = validateOptions(newOptions);
     console.log("newErrors", newErrors);
-    
+
     setErrors(newErrors);
     setOptions(newOptions);
     data.handleChange(id, newOptions, "options");
@@ -129,8 +129,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
         </div>
         {!isCollapsed && (
           <div className="custom-node-body">
-            <div>
-              <label>Display Text</label>
+            <div title="Display Text">
               <input
                 type="text"
                 value={options.displayText}
@@ -140,8 +139,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                 placeholder="Display Text"
               />
             </div>
-            <div>
-              <label>Property Name</label>
+            <div title="Property Name">
               <input
                 type="text"
                 value={options.propertyName}
@@ -151,8 +149,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                 placeholder="Property Name"
               />
             </div>
-            <div>
-              <label>Message</label>
+            <div title="Message">
               <input
                 type="text"
                 value={options.message}
@@ -169,24 +166,23 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
 
                   {options.subOptions.length > 1 && (
                     <button onClick={() => handleDeleteSubOption(index)}>
-                      Delete
+                      &times;
                     </button>
                   )}
                 </div>
                 {!subOption.isCollapsed && (
                   <div className="sub-option-body">
-                    <div>
-                      <label>Title</label>
+                    <div title="Title">
                       <input
                         type="text"
                         value={subOption.title}
                         onChange={(e) =>
                           handleSubOptionChange(index, "title", e.target.value)
                         }
+                        placeholder="Title"
                       />
                     </div>
-                    <div>
-                      <label>Sub Title</label>
+                    <div title="Sub Title">
                       <input
                         type="text"
                         value={subOption.subTitle}
@@ -197,20 +193,20 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                             e.target.value
                           )
                         }
+                        placeholder="Sub Title"
                       />
                     </div>
-                    <div>
-                      <label>Value</label>
+                    <div title="Value">
                       <input
                         type="text"
                         value={subOption.value}
                         onChange={(e) =>
                           handleSubOptionChange(index, "value", e.target.value)
                         }
+                        placeholder="Value"
                       />
                     </div>
-                    <div>
-                      <label>Lead Email To</label>
+                    <div title="Lead Email To">
                       <input
                         type="text"
                         value={subOption.leadEmail.to}
@@ -220,10 +216,10 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                             to: e.target.value,
                           })
                         }
+                         placeholder="Lead Email To"
                       />
                     </div>
-                    <div>
-                      <label>Lead Email Cc</label>
+                    <div title="Lead Email Cc">
                       <input
                         type="text"
                         value={subOption.leadEmail.cc}
@@ -233,6 +229,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                             cc: e.target.value,
                           })
                         }
+                        placeholder="Lead Email Cc"
                       />
                     </div>
                   </div>

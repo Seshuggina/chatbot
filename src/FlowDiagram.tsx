@@ -36,6 +36,7 @@ import GPTHandlerNode from "./nodes/GPTHandlerNode";
 import StopNode from "./nodes/StopNode";
 import StartNode from "./nodes/StartNode";
 import FileNode from "./nodes/FileNode";
+import MapNode from "./nodes/MapNode";
 
 //Edges
 import CustomEdge from "./edges/CustomEdge";
@@ -52,6 +53,7 @@ const nodeTypes = {
   gptHandler: GPTHandlerNode,
   stop: StopNode,
   file: FileNode,
+  map: MapNode,
 };
 
 const edgeTypes = {
@@ -129,6 +131,28 @@ const FlowDiagram: React.FC = () => {
             },
           },
         }),
+
+        ...(type === "file" && {
+          data: {
+            text: "",
+            filesData: {
+              message: "",
+              fileType: "",
+              url: "",
+              files: [],
+            },
+          },
+        }),
+
+        ...(type === "map" && {
+          data: {
+            text: "",
+            mapData: {
+              message: "",
+              url: "",
+            },
+          },
+        }),
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -183,6 +207,40 @@ const FlowDiagram: React.FC = () => {
     setNodes(updatedNodes);
     console.log("updated Nodes", nodes);
   };
+
+  const handleFileChange = useCallback((id: string, files: File[]) => {
+    console.log("files", files);
+
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === id) {
+          node.data = {
+            ...node.data,
+            filesData: {
+              ...files,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, []);
+
+  const handleMapChange = useCallback((id: string, newData: any) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === id) {
+          node.data = {
+            ...node.data,
+            mapData: {
+              ...newData,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, []);
 
   const handleDeleteNode = (id: string) => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
@@ -244,6 +302,8 @@ const FlowDiagram: React.FC = () => {
                   ...node.data,
                   handleChange: handleNodeChange,
                   onDelete: handleDeleteNode,
+                  handleFileChange: handleFileChange,
+                  handleMapChange: handleMapChange
                 },
               }))}
               edges={edges}
