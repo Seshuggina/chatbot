@@ -7,7 +7,8 @@
 .sub-option-header {
   padding: 5px 8px;
   font-weight: 500;
-  background-color: #e8e9f1;
+  color: #ffffff;
+  background-color: #BB8FCE;
   border-bottom: 1px solid #898989;
   display: flex;
   justify-content: space-between;
