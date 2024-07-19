@@ -1,64 +1,93 @@
 import React, { useState } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import { validateFiles } from "./../services/validation";
+import { validateFiles, validateFileNodeField } from "./../services/validateOptions";
+import { isValidURLStrict } from "../services/validation";
 import "./toolStyles.css";
 
 const FileNode: React.FC<NodeProps> = ({ id, data }) => {
   const { filesData, handleFileChange, onDelete } = data;
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [mimeType, setMimeType] = useState<string>("");
+  const [mimeType, setMimeType] = useState<string>("application/pdf");
 
-  const isValidURL = (url: string) => {
-    const urlPattern = new RegExp(
-      "^(https?:\\/\\/)?" + // protocol
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|" + // domain name
-      "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-      "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-      "(\\#[-a-z\\d_]*)?$", "i" // fragment locator
-    );
-    return !!urlPattern.test(url);
+
+  const handleBlur = (field: keyof typeof filesData, value: string) => {
+    const error = validateFileNodeField(field, value);
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: error }));
   };
 
   const handleFieldChange = (field: keyof typeof filesData, value: any) => {
-    let updatedFilesData = { ...filesData, [field]: value };
-    let newErrors: Record<string, string> = {};
+    const updatedFilesData = { ...filesData, [field]: value };
 
-    if (field === "url" && value && !isValidURL(value)) {
-      newErrors.url = "Invalid URL format";
+    // Reset URL if files are uploaded
+    if (field === "files" && value.length > 0) {
+      updatedFilesData.url = "";
+      setErrors((prevErrors) => ({ ...prevErrors, url: "" }));
     }
 
-    if (
-      filesData.url === "" &&
-      !validateFiles(filesData.files, filesData.fileType)
-    ) {
-      newErrors.files = "Uploaded files must match the selected file type";
+    // Reset files if URL is provided
+    if (field === "url" && value) {
+      updatedFilesData.files = [];
+      setErrors((prevErrors) => ({ ...prevErrors, files: "" }));
     }
 
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      handleFileChange(id, updatedFilesData);
-    }
+    handleFileChange(id, updatedFilesData);
 
     if (field === "fileType") {
-      let type = getAcceptType(value);
+      const type = getAcceptType(value);
       setMimeType(type);
     }
   };
 
   const getAcceptType = (fileType: string) => {
     switch (fileType) {
-      case "PDF":
+      case "pdf":
         return "application/pdf";
-      case "Images":
+      case "images":
         return "image/*";
-      case "Video":
+      case "video":
         return "video/*";
       default:
         return "";
     }
+  };
+
+  const handleSave = () => {
+    const messageError = validateFileNodeField("message", filesData.message);
+    const urlError = isValidURLStrict(filesData.url)
+      ? ""
+      : "Please enter a valid URL";
+    const fileTypeError = validateFileNodeField("fileType", filesData.fileType);
+    const filesError =
+      filesData.url === "" &&
+      !validateFiles(filesData.files, filesData.fileType)
+        ? "Uploaded files must match the selected file type"
+        : "";
+
+    setErrors({
+      message: messageError,
+      fileType: fileTypeError,
+      files: filesError,
+      url: filesData.files.length === 0 ? urlError : "",
+    });
+
+    if (messageError || fileTypeError || filesError || urlError) {
+      return;
+    }
+
+    handleFileChange(id, filesData, "filesData");
+  };
+
+  const isValidURL = (url: string) => {
+    const urlPattern = new RegExp(
+      "^(https?:\\/\\/)?" + // protocol
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|" + // domain name
+        "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+        "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
+    );
+    return !!urlPattern.test(url);
   };
 
   return (
@@ -74,32 +103,34 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
         </button>
       </div>
       <div className="custom-node-body">
-        <div>
-          <label>Message:</label>
+        <div title="Message">
           <input
             type="text"
+            placeholder="Message"
             value={filesData.message}
             onChange={(e) => handleFieldChange("message", e.target.value)}
-            placeholder="Message"
+            onBlur={(e) => handleBlur("message", e.target.value)}
           />
-          {errors.message && <div className="error">{errors.message}</div>}
+          {errors.message && <small className="error">{errors.message}</small>}
         </div>
-        <div>
-          <label>File Type:</label>
+        <div title="File Type">
           <select
             value={filesData.fileType}
             onChange={(e) => handleFieldChange("fileType", e.target.value)}
+            onBlur={(e) => handleBlur("fileType", e.target.value)}
           >
-            <option value=""></option>
-            <option value="PDF">PDF</option>
-            <option value="Images">Images</option>
-            <option value="Video">Video</option>
+            <option value="pdf">PDF</option>
+            <option value="images">Images</option>
+            <option value="video">Video</option>
           </select>
-          {errors.fileType && <div className="error">{errors.fileType}</div>}
+          {errors.fileType && (
+            <small className="error">{errors.fileType}</small>
+          )}
         </div>
         <div>
           <label>Upload File:</label>
           <input
+            disabled={!filesData.fileType || filesData.url !== ""}
             type="file"
             accept={mimeType}
             multiple
@@ -107,16 +138,18 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
               handleFieldChange("files", Array.from(e.target.files || []))
             }
           />
-          {errors.files && <div className="error">{errors.files}</div>}
+          {errors.files && <small className="error">{errors.files}</small>}
         </div>
-        <div className="mb-1">
-          <label>URL:</label>
+        <div className="mb-1" title="URL">
           <input
             type="text"
+            placeholder="URL"
             value={filesData.url}
             onChange={(e) => handleFieldChange("url", e.target.value)}
+            onBlur={(e) => handleBlur("url", e.target.value)}
+            disabled={filesData.files.length > 0}
           />
-          {errors.url && <div className="error">{errors.url}</div>}
+          {errors.url && <small className="error">{errors.url}</small>}
         </div>
       </div>
       <Handle type="target" position={Position.Top} />

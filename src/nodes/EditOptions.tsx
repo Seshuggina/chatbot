@@ -1,24 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./../styles/bootstrap.css";
 import "./OptionsNode.css";
-
-interface SubOption {
-  title: string;
-  subTitle: string;
-  value: string;
-  leadEmail: {
-    to: string;
-    cc: string;
-  };
-  isCollapsed?: boolean;
-}
-
-interface Option {
-  displayText: string;
-  propertyName: string;
-  message: string;
-  subOptions: SubOption[];
-}
+import { Option, SubOption } from "./../models/common.models";
+import { validateOptionField } from "./../services/validateOptions";
 
 interface EditOptionsOnPopUpProps {
   optionsData: Option;
@@ -32,6 +16,7 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
   close,
 }) => {
   const [mainSection, setMainSection] = useState<Option>(optionsData);
+  const [errors, setErrors] = useState<Record<string, any>>({});
 
   useEffect(() => {
     setMainSection(optionsData);
@@ -47,6 +32,32 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
     });
   };
 
+  const handleBlur = (field: string, value: string) => {
+    const error = validateOptionField(field, value);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [field]: error,
+    }));
+  };
+
+  const handleSubOptionBlur = (
+    subOptionIndex: number,
+    field: keyof SubOption,
+    value: string
+  ) => {
+    const error = validateOptionField(field, value);
+    setErrors((prevErrors: any) => ({
+      ...prevErrors,
+      subOptions: {
+        ...prevErrors.subOptions,
+        [subOptionIndex]: {
+          ...prevErrors.subOptions?.[subOptionIndex],
+          [field]: error,
+        },
+      },
+    }));
+  };
+
   const handleSubInputChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -55,14 +66,22 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
     const updatedSubOptions = [...mainSection.subOptions];
     const subOption = { ...updatedSubOptions[index] };
 
-    if (name.startsWith("leadEmail.")) {
-      const emailField = name.split(".")[1] as "to" | "cc";
-      subOption.leadEmail[emailField] = value;
-    } else {
-      (subOption as any)[name] = value;
-    }
+    (subOption as any)[name] = value;
 
     updatedSubOptions[index] = subOption;
+    setMainSection({
+      ...mainSection,
+      subOptions: updatedSubOptions,
+    });
+  };
+
+  const handleSelectChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    const updatedSubOptions = [...mainSection.subOptions];
+    updatedSubOptions[index].category = value;
     setMainSection({
       ...mainSection,
       subOptions: updatedSubOptions,
@@ -90,7 +109,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
           title: "",
           subTitle: "",
           value: "",
-          leadEmail: { to: "", cc: "" },
+          category: "",
+          leadEmailTo: "",
+          leadEmailCc: "",
         },
       ],
     });
@@ -110,21 +131,25 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
 
   return (
     <>
-      <div className="modal-header">
+      <div className="modal-header py-2">
         <h5 className="modal-title">Edit Options</h5>
-        <button type="button" className="close" title="Close popup" onClick={close}>
+        <button
+          type="button"
+          className="close"
+          title="Close popup"
+          onClick={close}
+        >
           <span>&times;</span>
         </button>
       </div>
       <div className="modal-body">
-        {/* <div className="container"> */}
         <div className="row">
           <div className="col-6">
             <div className="form-group">
               <label>Display Text</label>
               <input
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 name="displayText"
                 value={mainSection.displayText}
                 onChange={handleMainInputChange}
@@ -136,7 +161,7 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               <label>Property Name</label>
               <input
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 name="propertyName"
                 value={mainSection.propertyName}
                 onChange={handleMainInputChange}
@@ -147,10 +172,20 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
 
         <div className="form-group">
           <label>Message</label>
-          <textarea
-            className="form-control"
+          <input
+            type="text"
+            className="form-control form-control-sm"
             name="message"
             value={mainSection.message}
+            onChange={handleMainInputChange}
+          />
+        </div>
+        <div className="form-group">
+          <label>FeedBack</label>
+          <textarea
+            className="form-control form-control-sm"
+            name="feedback"
+            value={mainSection.feedback}
             onChange={handleMainInputChange}
           />
         </div>
@@ -163,7 +198,7 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               {mainSection.subOptions.length > 1 && (
                 <button
                   type="button"
-                  className="close"
+                  className="close btn btn-sm btn-danger"
                   onClick={() => deleteSubOption(index)}
                 >
                   &times;
@@ -178,11 +213,19 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       <label>Title</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-control form-control-sm"
                         name="title"
                         value={subOption.title}
                         onChange={(e) => handleSubInputChange(index, e)}
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "title", e.target.value)
+                        }
                       />
+                      {errors.subOptions && errors.subOptions[index]?.title && (
+                        <small className="error">
+                          {errors.subOptions[index]?.title}
+                        </small>
+                      )}
                     </div>
                   </div>
                   <div className="col-6">
@@ -190,26 +233,67 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       <label>Sub Title</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-control form-control-sm"
                         name="subTitle"
                         value={subOption.subTitle}
                         onChange={(e) => handleSubInputChange(index, e)}
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "subTitle", e.target.value)
+                        }
                       />
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.subTitle && (
+                          <small className="error">
+                            {errors.subOptions[index]?.subTitle}
+                          </small>
+                        )}
                     </div>
                   </div>
                 </div>
 
                 <div className="row">
-                  <div className="col-12">
+                  <div className="col-6">
                     <div className="form-group">
                       <label>Value</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-control form-control-sm"
                         name="value"
                         value={subOption.value}
                         onChange={(e) => handleSubInputChange(index, e)}
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "value", e.target.value)
+                        }
                       />
+                      {errors.subOptions && errors.subOptions[index]?.value && (
+                        <small className="error">
+                          {errors.subOptions[index]?.value}
+                        </small>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>Select Category</label>
+                      <select
+                        className="form-control form-control-sm"
+                        value={subOption.category}
+                        onChange={(e) => handleSelectChange(index, e)}
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "category", e.target.value)
+                        }
+                      >
+                        <option value="">Select Category</option>
+                        <option value="presale">Presale</option>
+                        <option value="general">General</option>
+                        <option value="others">Others</option>
+                      </select>
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.category && (
+                          <small className="error">
+                            {errors.subOptions[index]?.category}
+                          </small>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -220,11 +304,24 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       <label>Lead Email To</label>
                       <input
                         type="text"
-                        className="form-control"
-                        name="leadEmail.to"
-                        value={subOption.leadEmail.to}
+                        className="form-control form-control-sm"
+                        name="leadEmailTo"
+                        value={subOption.leadEmailTo}
                         onChange={(e) => handleSubInputChange(index, e)}
+                        onBlur={(e) =>
+                          handleSubOptionBlur(
+                            index,
+                            "leadEmailTo",
+                            e.target.value
+                          )
+                        }
                       />
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.leadEmailTo && (
+                          <small className="error">
+                            {errors.subOptions[index]?.leadEmailTo}
+                          </small>
+                        )}
                     </div>
                   </div>
                   <div className="col-6">
@@ -232,11 +329,24 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       <label>Lead Email Cc</label>
                       <input
                         type="text"
-                        className="form-control"
-                        name="leadEmail.cc"
-                        value={subOption.leadEmail.cc}
+                        className="form-control form-control-sm"
+                        name="leadEmailCc"
+                        value={subOption.leadEmailCc}
                         onChange={(e) => handleSubInputChange(index, e)}
+                        onBlur={(e) =>
+                          handleSubOptionBlur(
+                            index,
+                            "leadEmailCc",
+                            e.target.value
+                          )
+                        }
                       />
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.leadEmailCc && (
+                          <small className="error">
+                            {errors.subOptions[index]?.leadEmailCc}
+                          </small>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -244,15 +354,23 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
             )}
           </div>
         ))}
-        <button className="btn btn-primary" onClick={addSubOption}>
+        <button className="btn btn-primary btn-sm" onClick={addSubOption}>
           Add Sub Option
         </button>
       </div>
-      <div className="modal-footer">
-        <button type="button" className="btn btn-secondary" onClick={close}>
+      <div className="modal-footer py-2">
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={close}
+        >
           Close
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleSave}>
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          onClick={handleSave}
+        >
           Save changes
         </button>
       </div>

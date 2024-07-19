@@ -26,6 +26,7 @@ import {
   ReactFlowEdge,
   ReactFlowData,
 } from "./models/common.models";
+import useGlobalStore from "./services/glaboalStore";
 
 //Nodes
 import MessageNode from "./nodes/MessageNode";
@@ -75,6 +76,8 @@ const FlowDiagram: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showErrors, setShowErrors] = useState<boolean>(false);
 
+  const { valid, setValid } = useGlobalStore();
+
   const onNodesChange = useCallback(
     (changes: NodeChange[]) =>
       setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -97,10 +100,8 @@ const FlowDiagram: React.FC = () => {
   const onDrop = useCallback(
     (event: any) => {
       event.preventDefault();
-
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
       const type = event.dataTransfer.getData("application/reactflow");
-
       const position = {
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
@@ -120,12 +121,15 @@ const FlowDiagram: React.FC = () => {
               displayText: "",
               propertyName: "",
               message: "",
+              feedback: "",
               subOptions: [
                 {
                   title: "",
                   subTitle: "",
                   value: "",
-                  leadEmail: { to: "", cc: "" },
+                  leadEmailTo: "",
+                  leadEmailCc: "",
+                  category: "",
                 },
               ],
             },
@@ -137,7 +141,7 @@ const FlowDiagram: React.FC = () => {
             text: "",
             filesData: {
               message: "",
-              fileType: "",
+              fileType: "pdf",
               url: "",
               files: [],
             },
@@ -230,6 +234,8 @@ const FlowDiagram: React.FC = () => {
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === id) {
+          console.log("nodenode Maps", node);
+
           node.data = {
             ...node.data,
             mapData: {
@@ -288,7 +294,7 @@ const FlowDiagram: React.FC = () => {
   return (
     <>
       <div className="flow-diagram">
-        <Toolbar onDragStart={onDragStart} />
+        <div className="sidebar"></div>
         <div
           className="reactflow-wrapper"
           onDrop={onDrop}
@@ -303,7 +309,7 @@ const FlowDiagram: React.FC = () => {
                   handleChange: handleNodeChange,
                   onDelete: handleDeleteNode,
                   handleFileChange: handleFileChange,
-                  handleMapChange: handleMapChange
+                  handleMapChange: handleMapChange,
                 },
               }))}
               edges={edges}
@@ -313,13 +319,24 @@ const FlowDiagram: React.FC = () => {
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               onNodesDelete={onNodesDelete}
-              fitView
             >
               <MiniMap />
               <Controls />
               <Background />
             </ReactFlow>
           </ReactFlowProvider>
+        </div>
+        <div className="toolbar">
+          <Toolbar onDragStart={onDragStart} />
+          <div className="mt-5">
+            <button
+              disabled={showErrors}
+              className="btn btn-primary"
+              onClick={handleSave}
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
       <div className="action-flow-wrap">
@@ -341,15 +358,6 @@ const FlowDiagram: React.FC = () => {
             <ValidationMessages messages={errors} />
           </div>
         )}
-        <div className="">
-          <button
-            disabled={showErrors}
-            className="btn btn-primary"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-        </div>
       </div>
     </>
   );

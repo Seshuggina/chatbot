@@ -3,41 +3,45 @@ import { Handle, Position, NodeProps } from "reactflow";
 import Popup from "reactjs-popup";
 import "./OptionsNode.css";
 import EditOptionsOnPopUp from "./EditOptions";
-import { validateOptions } from "./../services/validation";
-
-interface SubOption {
-  title: string;
-  subTitle: string;
-  value: string;
-  leadEmail: {
-    to: string;
-    cc: string;
-  };
-  isCollapsed?: boolean;
-}
-
-interface Option {
-  displayText: string;
-  propertyName: string;
-  message: string;
-  subOptions: SubOption[];
-}
+import { SubOption, Option } from "./../models/common.models";
+// import { validateOptionField } from "./../services/validation";
+import { validateOptionField } from "./../services/validateOptions";
 
 const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
-  const optionsInput = data.options;
+  const optionData = data.options;
   const [open, setOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [options, setOptions] = useState<Option>(optionsInput);
+  const [errors, setErrors] = useState<Record<string, any>>({});
+  const [options, setOptions] = useState<Option>(optionData);
 
-  const closeModal = () => setOpen(false);
+  const handleBlur = (field: string, value: string) => {
+    const error = validateOptionField(field, value);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [field]: error,
+    }));
+  };
+
+  const handleSubOptionBlur = (
+    subOptionIndex: number,
+    field: keyof SubOption,
+    value: string
+  ) => {
+    const error = validateOptionField(field, value);
+    setErrors((prevErrors: any) => ({
+      ...prevErrors,
+      subOptions: {
+        ...prevErrors.subOptions,
+        [subOptionIndex]: {
+          ...prevErrors.subOptions?.[subOptionIndex],
+          [field]: error,
+        },
+      },
+    }));
+  };
 
   const handleInputChange = (field: keyof Option, value: string) => {
     const newOptions = { ...options, [field]: value };
-    const newErrors = validateOptions(newOptions);
-    console.log("newErrors", newErrors);
-
-    setErrors(newErrors);
     setOptions(newOptions);
     data.handleChange(id, newOptions, "options");
   };
@@ -48,9 +52,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
     value: string | { to: string; cc: string }
   ) => {
     const newSubOptions = [...options.subOptions];
-    if (field === "leadEmail" && typeof value !== "string") {
-      newSubOptions[optionIndex][field] = value as { to: string; cc: string };
-    } else if (typeof value === "string") {
+    if (typeof value === "string") {
       newSubOptions[optionIndex][field] = value as never;
     }
     const newOptions = { ...options, subOptions: newSubOptions };
@@ -63,10 +65,9 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
       title: "",
       subTitle: "",
       value: "",
-      leadEmail: {
-        to: "",
-        cc: "",
-      },
+      category: "",
+      leadEmailTo: "",
+      leadEmailCc: "",
       isCollapsed: false,
     };
 
@@ -104,6 +105,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
   const onDelete = (id: any) => {
     data.onDelete(id);
   };
+  const closeModal = () => setOpen(false);
 
   return (
     <>
@@ -116,7 +118,11 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
             {" "}
             Options
           </strong>
-          <button title="Expand" onClick={() => setOpen((o) => !o)}>
+          <button
+            className="btnNone"
+            title="Expand"
+            onClick={() => setOpen((o) => !o)}
+          >
             &#10063;
           </button>
           <button
@@ -132,22 +138,30 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
             <div title="Display Text">
               <input
                 type="text"
+                placeholder="Display Text"
                 value={options.displayText}
                 onChange={(e) =>
                   handleInputChange("displayText", e.target.value)
                 }
-                placeholder="Display Text"
+                onBlur={(e) => handleBlur("displayText", e.target.value)}
               />
+              {errors.displayText && (
+                <small className="error">{errors.displayText}</small>
+              )}
             </div>
             <div title="Property Name">
               <input
                 type="text"
+                placeholder="Property Name"
                 value={options.propertyName}
                 onChange={(e) =>
                   handleInputChange("propertyName", e.target.value)
                 }
-                placeholder="Property Name"
+                onBlur={(e) => handleBlur("propertyName", e.target.value)}
               />
+              {errors.propertyName && (
+                <small className="error">{errors.propertyName}</small>
+              )}
             </div>
             <div title="Message">
               <input
@@ -155,17 +169,38 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                 value={options.message}
                 placeholder="Display Text"
                 onChange={(e) => handleInputChange("message", e.target.value)}
+                onBlur={(e) => handleBlur("message", e.target.value)}
               />
+              {errors.message && (
+                <small className="error">{errors.message}</small>
+              )}
             </div>
+            <div title="Feedback">
+              <input
+                type="text"
+                value={options.feedback}
+                placeholder="Feedback"
+                onChange={(e) => handleInputChange("feedback", e.target.value)}
+                onBlur={(e) => handleBlur("feedback", e.target.value)}
+              />
+              {errors.feedback && (
+                <small className="error">{errors.feedback}</small>
+              )}
+            </div>
+            {/* Sub Options */}
             {options.subOptions.map((subOption, index) => (
               <div key={index} className="sub-option-section">
                 <div className="sub-option-header">
                   <strong onClick={() => toggleSubOption(index)}>
-                    {subOption.title || "Add Options"}
+                    Sub Option {index + 1}
                   </strong>
 
                   {options.subOptions.length > 1 && (
-                    <button onClick={() => handleDeleteSubOption(index)}>
+                    <button
+                      title="Delete Options"
+                      className="btn-danger"
+                      onClick={() => handleDeleteSubOption(index)}
+                    >
                       &times;
                     </button>
                   )}
@@ -175,16 +210,25 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                     <div title="Title">
                       <input
                         type="text"
+                        placeholder="Title"
                         value={subOption.title}
                         onChange={(e) =>
                           handleSubOptionChange(index, "title", e.target.value)
                         }
-                        placeholder="Title"
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "title", e.target.value)
+                        }
                       />
+                      {errors.subOptions && errors.subOptions[index]?.title && (
+                        <small className="error">
+                          {errors.subOptions[index]?.title}
+                        </small>
+                      )}
                     </div>
                     <div title="Sub Title">
                       <input
                         type="text"
+                        placeholder="Sub Title"
                         value={subOption.subTitle}
                         onChange={(e) =>
                           handleSubOptionChange(
@@ -193,50 +237,125 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                             e.target.value
                           )
                         }
-                        placeholder="Sub Title"
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "subTitle", e.target.value)
+                        }
                       />
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.subTitle && (
+                          <small className="error">
+                            {errors.subOptions[index]?.subTitle}
+                          </small>
+                        )}
                     </div>
                     <div title="Value">
                       <input
                         type="text"
+                        placeholder="Value"
                         value={subOption.value}
                         onChange={(e) =>
                           handleSubOptionChange(index, "value", e.target.value)
                         }
-                        placeholder="Value"
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "value", e.target.value)
+                        }
                       />
+                      {errors.subOptions && errors.subOptions[index]?.value && (
+                        <small className="error">
+                          {errors.subOptions[index]?.value}
+                        </small>
+                      )}
+                    </div>
+                    <div title="Category">
+                      <select
+                        value={subOption.category}
+                        onChange={(e) =>
+                          handleSubOptionChange(
+                            index,
+                            "category",
+                            e.target.value
+                          )
+                        }
+                        onBlur={(e) =>
+                          handleSubOptionBlur(index, "category", e.target.value)
+                        }
+                      >
+                        <option value="">Select Category</option>
+                        <option value="presale">Presale</option>
+                        <option value="general">General</option>
+                        <option value="others">Others</option>
+                      </select>
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.category && (
+                          <small className="error">
+                            {errors.subOptions[index]?.category}
+                          </small>
+                        )}
                     </div>
                     <div title="Lead Email To">
                       <input
                         type="text"
-                        value={subOption.leadEmail.to}
+                        placeholder="Lead Email To"
+                        value={subOption.leadEmailTo}
                         onChange={(e) =>
-                          handleSubOptionChange(index, "leadEmail", {
-                            ...subOption.leadEmail,
-                            to: e.target.value,
-                          })
+                          handleSubOptionChange(
+                            index,
+                            "leadEmailTo",
+                            e.target.value
+                          )
                         }
-                         placeholder="Lead Email To"
+                        onBlur={(e) =>
+                          handleSubOptionBlur(
+                            index,
+                            "leadEmailTo",
+                            e.target.value
+                          )
+                        }
                       />
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.leadEmailTo && (
+                          <small className="error">
+                            {errors.subOptions[index]?.leadEmailTo}
+                          </small>
+                        )}
                     </div>
                     <div title="Lead Email Cc">
                       <input
                         type="text"
-                        value={subOption.leadEmail.cc}
-                        onChange={(e) =>
-                          handleSubOptionChange(index, "leadEmail", {
-                            ...subOption.leadEmail,
-                            cc: e.target.value,
-                          })
-                        }
                         placeholder="Lead Email Cc"
+                        value={subOption.leadEmailCc}
+                        onChange={(e) =>
+                          handleSubOptionChange(
+                            index,
+                            "leadEmailCc",
+                            e.target.value
+                          )
+                        }
+                        onBlur={(e) =>
+                          handleSubOptionBlur(
+                            index,
+                            "leadEmailCc",
+                            e.target.value
+                          )
+                        }
                       />
+                      {errors.subOptions &&
+                        errors.subOptions[index]?.leadEmailCc && (
+                          <small className="error">
+                            {errors.subOptions[index]?.leadEmailCc}
+                          </small>
+                        )}
                     </div>
                   </div>
                 )}
               </div>
             ))}
-            <button onClick={handleAddSubOption}>Add</button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={handleAddSubOption}
+            >
+              &nbsp; + &nbsp;
+            </button>
           </div>
         )}
         <Handle type="source" position={Position.Bottom} />

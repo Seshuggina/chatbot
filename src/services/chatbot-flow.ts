@@ -9,10 +9,9 @@ type ReactFlowNode = {
         title: string;
         subTitle: string;
         value: string;
-        leadEmail: {
-          to: string;
-          cc: string;
-        };
+        catrgory:string;
+        leadEmailTo:String;
+        leadEmailCc:String;
       }[];
     };
   };
@@ -101,9 +100,8 @@ export function generateChatbotFlow(reactflowData: ReactFlowData): ChatbotFlow {
           title: option.title,
           subTitle: option.subTitle,
           value: option.value,
-          settings: {
-            leadEmail: option.leadEmail,
-          },
+          leadEmailCc: option.leadEmailTo,
+          leadEmailTo: option.leadEmailCc,
           id: option.title.replace(/\s+/g, "").toLowerCase(),
           nextFlowId: null, // Will be set later
         });

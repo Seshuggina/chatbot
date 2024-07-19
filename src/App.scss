@@ -4,6 +4,10 @@
   border: 1px solid #ccc;
   overflow: hidden;
   min-height: 400px;
+  .sidebar {
+    width: 200px;
+    border-right: 2px solid #ccc;
+  }
   .toolbar {
     width: 150px;
     flex-direction: column;
@@ -15,7 +19,9 @@
     max-height: 100%;
     overflow-x: hidden;
     flex-shrink: 0;
-    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    justify-content: space-between;
+    display: flex;
     button {
       width: 100%;
       flex: 1;
@@ -56,4 +62,11 @@
     min-width: 100px;
     margin-right: 20px;
   }
+}
+
+
+.btnNone {
+  border: none;
+  background-color: none;
+  padding: none;
 }

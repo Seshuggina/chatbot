@@ -1,15 +1,15 @@
 .sub-option-section {
-  border: 1px solid #898989;
+  border: 1px solid #093b85;
   border-radius: 2px;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 .sub-option-header {
-  padding: 5px 8px;
+  padding: 2px 8px;
   font-weight: 500;
   color: #ffffff;
-  background-color: #BB8FCE;
-  border-bottom: 1px solid #898989;
+  background-color: #093b85;
+  border-bottom: 1px solid #093b85;
   display: flex;
   justify-content: space-between;
   align-items: center;

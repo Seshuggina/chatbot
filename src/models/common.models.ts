@@ -9,10 +9,8 @@ export type ReactFlowNode = {
         title: string;
         subTitle: string;
         value: string;
-        leadEmail: {
-          to: string;
-          cc: string;
-        };
+        leadEmailTo:string;
+        leadEmailCc:string;
       }[];
     };
   };
@@ -27,3 +25,23 @@ export type ReactFlowData = {
   nodes: any[];
   edges: ReactFlowEdge[];
 };
+
+// Options
+export interface SubOption {
+  title: string;
+  subTitle: string;
+  value: string;
+  category: string;
+  leadEmailTo: string;
+  leadEmailCc: string;
+  isCollapsed?: boolean;
+}
+
+export interface Option {
+  displayText: string;
+  propertyName: string;
+  message: string;
+  feedback: string;
+  subOptions: SubOption[];
+}
+// End of Options
