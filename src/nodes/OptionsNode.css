@@ -5,9 +5,10 @@
   margin-bottom: 10px;
 }
 .sub-option-header {
-  padding: 8px 10px;
-  font-weight: 500;
-  background-color: #e8e9f1;
+  color: #ffffff;
+  padding: 5px 10px;
+  font-weight: 400;
+  background-color: #BB8FCE;
   border-bottom: 1px solid #898989;
   display: flex;
   justify-content: space-between;
