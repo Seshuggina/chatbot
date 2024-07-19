@@ -5,13 +5,14 @@
   margin-bottom: 10px;
 }
 .sub-option-header {
-  padding: 8px 10px;
+  padding: 5px 8px;
   font-weight: 500;
   background-color: #e8e9f1;
   border-bottom: 1px solid #898989;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 14px;
 }
 .sub-option-body {
   padding: 10px 10px;
