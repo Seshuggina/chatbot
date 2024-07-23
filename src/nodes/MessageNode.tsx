@@ -6,6 +6,7 @@ import "./../styles/node.scss";
 const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
   const [text, setText] = useState(data.text);
   const [isEditing, setIsEditing] = useState(false);
+
   const handleDoubleClick = () => {
     setIsEditing(true);
   };
@@ -15,6 +16,7 @@ const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
     setText(newText);
     data.handleChange(id, newText);
   };
+
   const handleBlur = () => {
     setIsEditing(false);
   };
@@ -24,10 +26,16 @@ const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   return (
-    <div className="custom-node message-node">
-      <div className="custom-node-header">
-        Message
-        <button className="closeButton remove-node" title="Delete Message Node" onClick={() => onDelete(id)}>&times;</button>
+    <div className="bg-gray-800 text-white p-4 rounded-md shadow-lg">
+      <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2">
+        <span>Message</span>
+        <button
+          className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
+          title="Delete Message Node"
+          onClick={() => onDelete(id)}
+        >
+          &times;
+        </button>
       </div>
       <div className="custom-node-body">
         {isEditing ? (
@@ -36,6 +44,7 @@ const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
             onChange={handleTextChange}
             onBlur={handleBlur}
             placeholder="Enter your message"
+            className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded"
           />
         ) : (
           <div onDoubleClick={handleDoubleClick}>
@@ -43,8 +52,8 @@ const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Bottom} />
-      <Handle type="target" position={Position.Top} />
+      <Handle type="source" position={Position.Bottom} className="w-2 h-2 bg-white border-none" />
+      <Handle type="target" position={Position.Top} className="w-2 h-2 bg-white border-none" />
     </div>
   );
 };

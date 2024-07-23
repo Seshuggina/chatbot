@@ -7,15 +7,30 @@ const StopNode: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   return (
-    <div className="custom-node">
-      <div className="custom-node-header">Stop
-      <button className="closeButton remove-node" title="Delete Stop Node" onClick={() => onDelete(id)}>&times;</button>
+    <div className="bg-gray-800 text-white p-4 rounded-md shadow-lg">
+      <div className="flex justify-between items-center mb-2">
+        <span>Stop</span>
+        <button
+          className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
+          title="Delete Stop Node"
+          onClick={() => onDelete(id)}
+        >
+          &times;
+        </button>
       </div>
       <div className="custom-node-body">
         {data.stop ? data.stop : "The chat will stop here"}
       </div>
-      <Handle type="source" position={Position.Bottom} />
-      <Handle type="target" position={Position.Top} />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="w-2 h-2 bg-white border-none"
+      />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="w-2 h-2 bg-white border-none"
+      />
     </div>
   );
 };

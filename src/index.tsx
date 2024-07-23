@@ -4,6 +4,8 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import FlowDiagram from './FlowDiagram';
 import 'reactjs-popup/dist/index.css';
+import './styles/tailwind.css';
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

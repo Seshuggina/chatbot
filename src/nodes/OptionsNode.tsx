@@ -6,11 +6,12 @@ import EditOptionsOnPopUp from "./EditOptions";
 import { SubOption, Option } from "./../models/common.models";
 // import { validateOptionField } from "./../services/validation";
 import { validateOptionField } from "./../services/validateOptions";
+import LeadFormNode from "./LeadFlowNode";
 
 const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
   const optionData = data.options;
   const [open, setOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isOptionCollapsed, setIsCollapsed] = useState(false);
   const [errors, setErrors] = useState<Record<string, any>>({});
   const [options, setOptions] = useState<Option>(optionData);
 
@@ -68,7 +69,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
       category: "",
       leadEmailTo: "",
       leadEmailCc: "",
-      isCollapsed: false,
+      isCollapsed: true,
     };
 
     const newOptions = {
@@ -78,6 +79,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
 
     setOptions(newOptions);
     data.handleChange(id, newOptions, "options");
+    setOpen(true);
   };
 
   const handleDeleteSubOption = (index: number) => {
@@ -98,8 +100,18 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   const savedPopupData = (modifiedOptions: Option) => {
-    setOptions(modifiedOptions);
-    data.handleChange(id, modifiedOptions, "options");
+    const updatedOptions = {
+      ...modifiedOptions,
+      subOptions: modifiedOptions.subOptions.map((sub) => ({
+        ...sub,
+        isCollapsed: true,
+      })),
+    };
+
+    console.log("Before setting options:", updatedOptions);
+    setOptions(updatedOptions);
+    data.handleChange(id, updatedOptions, "options");
+    console.log("After setting options:", updatedOptions);
   };
 
   const onDelete = (id: any) => {
@@ -113,9 +125,8 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
         <div className="custom-node-header d-flex justify-content-between align-items-center">
           <strong
             className="cursor-pointer"
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={() => setIsCollapsed(!isOptionCollapsed)}
           >
-            {" "}
             Options
           </strong>
           <button
@@ -133,7 +144,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
             &times;
           </button>
         </div>
-        {!isCollapsed && (
+        {!isOptionCollapsed && (
           <div className="custom-node-body">
             <div title="Display Text">
               <input
@@ -192,7 +203,9 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
               <div key={index} className="sub-option-section">
                 <div className="sub-option-header">
                   <strong onClick={() => toggleSubOption(index)}>
-                    Sub Option {index + 1}
+                    {subOption.title
+                      ? `#${index + 1} - ${subOption.title}`
+                      : `#${index + 1} Sub Option`}
                   </strong>
 
                   {options.subOptions.length > 1 && (
@@ -348,6 +361,7 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                     </div>
                   </div>
                 )}
+                 
               </div>
             ))}
             <button

@@ -7,8 +7,6 @@ import {
   useReactFlow,
 } from 'reactflow';
 
-import './../styles/edge.scss';
-
 export default function CustomEdge({
   id,
   sourceX,
@@ -49,7 +47,7 @@ export default function CustomEdge({
           }}
           className="nodrag nopan"
         >
-          <button className="edgebutton" onClick={onEdgeClick}>
+          <button className="w-6 h-6 bg-gray-300 border border-gray-500 rounded-full text-base font-bold text-gray-800 flex items-center justify-center hover:bg-red-600 hover:border-red-700 hover:text-white hover:shadow-md" onClick={onEdgeClick}>
             &times;
           </button>
         </div>

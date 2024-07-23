@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   addEdge,
   applyNodeChanges,
@@ -18,7 +18,11 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import "./styles/button.scss";
 import "./App.scss";
-import { validateOptions } from "./services/validation";
+import {
+  validateOptions,
+  validateFileNode,
+  validateMapNode,
+} from "./services/validation";
 import ValidationMessages from "./component/ValidationMessages";
 import { generateChatbotFlow } from "./services/chatbot-flow";
 import {
@@ -38,6 +42,7 @@ import StopNode from "./nodes/StopNode";
 import StartNode from "./nodes/StartNode";
 import FileNode from "./nodes/FileNode";
 import MapNode from "./nodes/MapNode";
+import MainOption from "./nodes/Option/MainOption";
 
 //Edges
 import CustomEdge from "./edges/CustomEdge";
@@ -48,7 +53,7 @@ import Toolbar from "./component/Toolbar"; // Import the Toolbar component
 const nodeTypes = {
   start: StartNode,
   message: MessageNode,
-  options: OptionsNode,
+  options: MainOption,
   leadForm: LeadFormNode,
   leadFlow: LeadFlowNode,
   gptHandler: GPTHandlerNode,
@@ -71,6 +76,20 @@ const initialNodes: Node[] = [
 ];
 
 const FlowDiagram: React.FC = () => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -78,19 +97,25 @@ const FlowDiagram: React.FC = () => {
 
   const { valid, setValid } = useGlobalStore();
 
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) =>
-      setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) =>
-      setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
+  const resetFlags = () => {
+    setErrors({});
+    setShowErrors(false);
+  };
 
-  const onConnect = (params: any) =>
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    resetFlags();
+    setNodes((nds) => applyNodeChanges(changes, nds));
+  }, []);
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    resetFlags();
+    setEdges((eds) => applyEdgeChanges(changes, eds));
+  }, []);
+
+  const onConnect = (params: any) => {
+    resetFlags();
     setEdges((eds) => addEdge({ ...params, type: "custom" }, eds));
+  };
 
   const onDragOver = useCallback((event: any) => {
     event.preventDefault();
@@ -99,6 +124,7 @@ const FlowDiagram: React.FC = () => {
 
   const onDrop = useCallback(
     (event: any) => {
+      resetFlags();
       event.preventDefault();
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
       const type = event.dataTransfer.getData("application/reactflow");
@@ -130,6 +156,7 @@ const FlowDiagram: React.FC = () => {
                   leadEmailTo: "",
                   leadEmailCc: "",
                   category: "",
+                  isCollapsed: true,
                 },
               ],
             },
@@ -172,15 +199,26 @@ const FlowDiagram: React.FC = () => {
       setShowErrors(true);
       return false;
     }
+
+    let allErrors: Record<string, string> = {};
+
     for (const nodeDetails of nodes) {
       if (nodeDetails.type === "options") {
         const errors = validateOptions(nodeDetails.data.options);
-        if (Object.keys(errors).length > 0) {
-          setErrors(errors);
-          console.log("errors", errors);
-          return;
-        }
+        allErrors = { ...allErrors, ...errors };
+      } else if (nodeDetails.type === "file") {
+        const errors = validateFileNode(nodeDetails.data.filesData);
+        allErrors = { ...allErrors, ...errors };
+      } else if (nodeDetails.type === "map") {
+        const errors = validateMapNode(nodeDetails.data.mapData);
+        allErrors = { ...allErrors, ...errors };
       }
+    }
+
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+      setShowErrors(true);
+      return;
     }
 
     const flow: ReactFlowData = {
@@ -194,6 +232,7 @@ const FlowDiagram: React.FC = () => {
   };
 
   const handleNodeChange = (id: string, newData: any, nodeType: string) => {
+    resetFlags();
     const updatedNodes = nodes.map((node) => {
       if (node.id === id) {
         return {
@@ -213,6 +252,7 @@ const FlowDiagram: React.FC = () => {
   };
 
   const handleFileChange = useCallback((id: string, files: File[]) => {
+    resetFlags();
     console.log("files", files);
 
     setNodes((nds) =>
@@ -231,6 +271,7 @@ const FlowDiagram: React.FC = () => {
   }, []);
 
   const handleMapChange = useCallback((id: string, newData: any) => {
+    resetFlags();
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === id) {
@@ -249,6 +290,7 @@ const FlowDiagram: React.FC = () => {
   }, []);
 
   const handleDeleteNode = (id: string) => {
+    resetFlags();
     setNodes((nds) => nds.filter((node) => node.id !== id));
     setEdges((eds) =>
       eds.filter((edge) => edge.source !== id && edge.target !== id)
@@ -257,6 +299,7 @@ const FlowDiagram: React.FC = () => {
 
   const onNodesDelete = useCallback(
     (deleted: any) => {
+      resetFlags();
       setEdges(
         deleted.reduce((acc: any, node: any) => {
           const incomers = getIncomers(node, nodes, edges);
@@ -330,7 +373,7 @@ const FlowDiagram: React.FC = () => {
           <Toolbar onDragStart={onDragStart} />
           <div className="mt-5">
             <button
-              disabled={showErrors}
+              disabled={Object.keys(errors).length > 0}
               className="btn btn-primary"
               onClick={handleSave}
             >

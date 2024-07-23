@@ -2,9 +2,33 @@
   position: relative;
   color: #ffffff;
   background-color: #093b85;
+  &::after {
+    background: linear-gradient(-45deg, #e81cff, #40c9ff);
+    content: "";
+    height: 3px;
+    left: 0;
+    position: absolute;
+    bottom: -2px;
+    width: 100%;
+    z-index: 1;
+    left: 0;
+    right: 0;
+  }
   .remove-node {
     position: absolute;
     right: -15px;
     top: -15px;
   }
 }
+
+.modal-body {
+  .form-group label {
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .form-control-sm {
+    min-height: calc(1.2em + (0.5rem + 2px));
+    padding: 0.05rem 0.5rem;
+  }
+}
+

@@ -58,11 +58,11 @@ export const validateOptions = (options: any): Record<string, string> => {
         "Value must be between 3 and 500 characters";
     }
 
-    if (!subOption.leadEmail.to || !isValidEmail(subOption.leadEmail.to)) {
+    if (!subOption.leadEmailTo || !isValidEmail(subOption.leadEmailTo)) {
       newErrors[`leadEmailTo_${index}`] = "Lead Email To must be a valid email";
     }
 
-    if (subOption.leadEmail.cc && !isValidEmail(subOption.leadEmail.cc)) {
+    if (subOption.leadEmailCc && !isValidEmail(subOption.leadEmailCc)) {
       newErrors[`leadEmailCc_${index}`] = "Lead Email CC must be a valid email";
     }
   });
@@ -70,22 +70,65 @@ export const validateOptions = (options: any): Record<string, string> => {
   return newErrors;
 };
 
+export const validateFileNode = (filesData: any): Record<string, string> => {
+  const errors: Record<string, string> = {};
+
+  if (
+    !filesData.message ||
+    filesData.message.length < 3 ||
+    filesData.message.length > 500
+  ) {
+    errors.message = "Message must be between 3 and 500 characters";
+  }
+
+  const isValidUrl = filesData.url && isValidURLStrict(filesData.url);
+  const hasValidFiles =
+    filesData.files && validateFiles(filesData.files, filesData.fileType);
+
+  if (!isValidUrl && !hasValidFiles) {
+    errors.fileOrUrl = "Either a valid URL or valid files must be provided";
+  }
+
+  if (hasValidFiles && !filesData.fileType) {
+    errors.fileType = "File type is required";
+  }
+
+  return errors;
+};
+
+export const validateMapNode = (mapData: any): Record<string, string> => {
+  const errors: Record<string, string> = {};
+
+  if (
+    !mapData.message ||
+    mapData.message.length < 3 ||
+    mapData.message.length > 500
+  ) {
+    errors.message = "Message must be between 3 and 500 characters";
+  }
+
+  if (!mapData.url || !isValidURLStrict(mapData.url)) {
+    errors.url = "URL must be valid";
+  }
+
+  return errors;
+};
+
 export const validateFiles = (files: File[], fileType: string): boolean => {
-  const allowedTypes = {
-    PDF: "application/pdf",
-    Images: ["image/jpeg", "image/png", "image/gif"],
-    Video: "video/mp4",
+  if (!files || files.length === 0) return false;
+
+  const fileExtension: Record<string, string | string[]> = {
+    pdf: "pdf",
+    images: ["jpg", "jpeg", "png", "gif"],
+    video: ["mp4", "avi", "mov"],
   };
 
+  const extensions = fileExtension[fileType];
   return files.every((file) => {
-    if (fileType === "PDF") {
-      return file.type === allowedTypes.PDF;
-    } else if (fileType === "Images") {
-      return allowedTypes.Images.includes(file.type);
-    } else if (fileType === "Video") {
-      return file.type === allowedTypes.Video;
-    }
-    return false;
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    return Array.isArray(extensions)
+      ? extensions.includes(ext || "")
+      : ext === extensions;
   });
 };
 

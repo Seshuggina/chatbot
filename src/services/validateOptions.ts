@@ -82,10 +82,10 @@ export const validateFileNodeField = (field: any, value: string): string => {
 
 export const validateFiles = (files: File[], fileType: string): boolean => {
   if (!files || files.length === 0) return false;
-  const fileExtension:any = {
-    PDF: "pdf",
-    Images: ["jpg", "jpeg", "png", "gif"],
-    Video: ["mp4", "avi", "mov"],
+  const fileExtension: any = {
+    pdf: "pdf",
+    images: ["jpg", "jpeg", "png", "gif"],
+    video: ["mp4", "avi", "mov"],
   };
   const extensions = fileExtension[fileType];
   return files.every((file) => {
