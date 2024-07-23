@@ -18,6 +18,7 @@ interface SubOptionProps {
   ) => void;
   onDelete: (index: number) => void;
   toggleSubOption: (index: number) => void;
+  length: number;
 }
 
 const SubOption: React.FC<SubOptionProps> = ({
@@ -28,28 +29,69 @@ const SubOption: React.FC<SubOptionProps> = ({
   onChange,
   onDelete,
   toggleSubOption,
+  length,
 }) => {
   return (
-    <div className="bg-gray-700 text-white rounded-md p-4 mt-2">
-      <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => toggleSubOption(index)}>
-        <strong>
-          {subOption.title
-            ? `#${index + 1} - ${subOption.title}`
-            : `#${index + 1} Sub Option`}
-        </strong>
-        <button
-          title="Delete Option"
-          className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent click from bubbling up to the header
-            onDelete(index);
-          }}
-        >
-          &times;
-        </button>
+    <div className="bg-gray-700 text-white rounded-md p-1 mt-2">
+      <div
+        className="flex justify-between items-center cursor-pointer"
+        onClick={() => toggleSubOption(index)}
+      >
+        <div className="flex items-center">
+          {/* Accordion Icon */}
+          {subOption.isCollapsed ? (
+            <svg
+              className="w-5 h-5 text-gray-500 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 15l7-7 7 7"
+              ></path>
+            </svg>
+          ) : (
+            <svg
+              className="w-5 h-5 text-gray-500 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          )}
+          <strong>
+            {subOption.title
+              ? `#${index + 1} - ${subOption.title}`
+              : `#${index + 1} Sub Option`}
+          </strong>
+        </div>
+        {length > 1 && (
+          <button
+            title="Delete Option"
+            className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent click from bubbling up to the header
+              onDelete(index);
+            }}
+          >
+            &times;
+          </button>
+        )}
       </div>
+
       {!subOption.isCollapsed && (
-        <div className="space-y-4">
+        <div className="space-y-4 py-2">
           <div>
             <input
               type="text"
@@ -57,7 +99,7 @@ const SubOption: React.FC<SubOptionProps> = ({
               value={subOption.title}
               onChange={(e) => onChange(index, "title", e.target.value)}
               onBlur={(e) => onBlur(index, "title", e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded text-sm"
+              className="w-full p-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
             />
             {errors.title && (
               <small className="text-red-500">{errors.title}</small>
@@ -70,7 +112,7 @@ const SubOption: React.FC<SubOptionProps> = ({
               value={subOption.subTitle}
               onChange={(e) => onChange(index, "subTitle", e.target.value)}
               onBlur={(e) => onBlur(index, "subTitle", e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded text-sm"
+              className="w-full p-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
             />
             {errors.subTitle && (
               <small className="text-red-500">{errors.subTitle}</small>
@@ -83,7 +125,7 @@ const SubOption: React.FC<SubOptionProps> = ({
               value={subOption.value}
               onChange={(e) => onChange(index, "value", e.target.value)}
               onBlur={(e) => onBlur(index, "value", e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded text-sm"
+              className="w-full p-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
             />
             {errors.value && (
               <small className="text-red-500">{errors.value}</small>
@@ -94,7 +136,7 @@ const SubOption: React.FC<SubOptionProps> = ({
               value={subOption.category}
               onChange={(e) => onChange(index, "category", e.target.value)}
               onBlur={(e) => onBlur(index, "category", e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded text-sm"
+              className="w-full p-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
             >
               <option value="">Select Category</option>
               <option value="presale">Presale</option>
@@ -112,7 +154,7 @@ const SubOption: React.FC<SubOptionProps> = ({
               value={subOption.leadEmailTo}
               onChange={(e) => onChange(index, "leadEmailTo", e.target.value)}
               onBlur={(e) => onBlur(index, "leadEmailTo", e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded text-sm"
+              className="w-full p-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
             />
             {errors.leadEmailTo && (
               <small className="text-red-500">{errors.leadEmailTo}</small>
@@ -125,7 +167,7 @@ const SubOption: React.FC<SubOptionProps> = ({
               value={subOption.leadEmailCc}
               onChange={(e) => onChange(index, "leadEmailCc", e.target.value)}
               onBlur={(e) => onBlur(index, "leadEmailCc", e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded text-sm"
+              className="w-full p-1 border border-gray-600 bg-gray-800 text-white rounded text-sm"
             />
             {errors.leadEmailCc && (
               <small className="text-red-500">{errors.leadEmailCc}</small>

@@ -147,7 +147,7 @@ const FlowDiagram: React.FC = () => {
               displayText: "",
               propertyName: "",
               message: "",
-              feedback: "",
+              fallback: "",
               subOptions: [
                 {
                   title: "",
@@ -374,7 +374,7 @@ const FlowDiagram: React.FC = () => {
           <div className="mt-5">
             <button
               disabled={Object.keys(errors).length > 0}
-              className="btn btn-primary"
+              className="px-2 py-2 font-semibold text-white btn-primary-custom rounded items-center text-center"
               onClick={handleSave}
             >
               Save

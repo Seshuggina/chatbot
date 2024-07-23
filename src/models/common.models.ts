@@ -41,7 +41,7 @@ export interface Option {
   displayText: string;
   propertyName: string;
   message: string;
-  feedback: string;
+  fallback: string;
   subOptions: SubOption[];
 }
 // End of Options

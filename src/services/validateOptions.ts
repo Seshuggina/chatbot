@@ -19,10 +19,10 @@ export const validateOptionField = (field: string, value: string): string => {
       if (value.length > 500) return "Message must be at most 500 characters";
       break;
 
-    case "feedback":
-      if (!value) return "Feedback is required";
-      if (value.length < 3) return "Feedback must be at least 3 characters";
-      if (value.length > 50) return "Feedback must be at most 50 characters";
+    case "fallback":
+      if (!value) return "Fall back is required";
+      if (value.length < 3) return "Fall Back must be at least 3 characters";
+      if (value.length > 50) return "Fall back must be at most 50 characters";
       break;
 
     case "title":

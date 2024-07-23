@@ -186,16 +186,16 @@ const OptionsNode: React.FC<NodeProps> = ({ data, id }) => {
                 <small className="error">{errors.message}</small>
               )}
             </div>
-            <div title="Feedback">
+            <div title="Fal Back">
               <input
                 type="text"
-                value={options.feedback}
-                placeholder="Feedback"
-                onChange={(e) => handleInputChange("feedback", e.target.value)}
-                onBlur={(e) => handleBlur("feedback", e.target.value)}
+                value={options.fallback}
+                placeholder="fallback"
+                onChange={(e) => handleInputChange("fallback", e.target.value)}
+                onBlur={(e) => handleBlur("fallback", e.target.value)}
               />
-              {errors.feedback && (
-                <small className="error">{errors.feedback}</small>
+              {errors.fallback && (
+                <small className="error">{errors.fallback}</small>
               )}
             </div>
             {/* Sub Options */}

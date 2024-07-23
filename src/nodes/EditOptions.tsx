@@ -137,26 +137,26 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
   return (
     <div className="fixed inset-0 flex flex-col bg-gray-900 text-white">
       <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white shadow-md z-10">
-        <div className="modal-header p-4">
+        <div className="modal-header p-4 flex justify-between items-center">
           <h5 className="modal-title text-lg font-bold">Edit Options</h5>
           <button
             type="button"
-            className="text-white float-right"
+            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
             title="Close popup"
             onClick={close}
           >
-            <span>&times;</span>
+            &times;
           </button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 pt-16 pb-20">
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4 mb-1">
           <div className="flex-1">
-            <div className="form-group mb-2">
+            <div className="form-group mb-1">
               <label className="block text-gray-400">Display Text</label>
               <input
                 type="text"
-                className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-700 text-white rounded"
+                className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
                 name="displayText"
                 value={mainSection.displayText}
                 onChange={handleMainInputChange}
@@ -168,11 +168,11 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
             </div>
           </div>
           <div className="flex-1">
-            <div className="form-group mb-2">
+            <div className="form-group mb-1">
               <label className="block text-gray-400">Property Name</label>
               <input
                 type="text"
-                className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-700 text-white rounded"
+                className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
                 name="propertyName"
                 value={mainSection.propertyName}
                 onChange={handleMainInputChange}
@@ -185,11 +185,11 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
           </div>
         </div>
 
-        <div className="form-group mb-2">
+        <div className="form-group mb-1">
           <label className="block text-gray-400">Message</label>
           <input
             type="text"
-            className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-700 text-white rounded"
+            className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
             name="message"
             value={mainSection.message}
             onChange={handleMainInputChange}
@@ -199,24 +199,24 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
             <small className="text-red-500">{errors.message}</small>
           )}
         </div>
-        <div className="form-group mb-2">
-          <label className="block text-gray-400">Feedback</label>
+        <div className="form-group mb-1">
+          <label className="block text-gray-400">Fall back</label>
           <textarea
-            className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-700 text-white rounded"
-            name="feedback"
-            value={mainSection.feedback}
+            className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
+            name="fallback"
+            value={mainSection.fallback}
             onChange={handleMainInputChange}
-            onBlur={(e) => handleBlur("feedback", e.target.value)}
+            onBlur={(e) => handleBlur("fallback", e.target.value)}
           />
-          {errors.feedback && (
-            <small className="text-red-500">{errors.feedback}</small>
+          {errors.fallback && (
+            <small className="text-red-500">{errors.fallback}</small>
           )}
         </div>
 
         {mainSection.subOptions.map((subOption, index) => (
-          <div key={index} className="accordion mb-4">
+          <div key={index} className="accordion mb-2">
             <div
-              className={`accordion-header flex items-center p-2 cursor-pointer border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 transition-colors`}
+              className={`accordion-header flex items-center p-1 cursor-pointer border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 transition-colors`}
               onClick={() => handleSubOptionToggle(index)}
             >
               <span className="mr-3">
@@ -255,23 +255,28 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               <span className="flex-1">
                 {subOption.title || `Sub Option ${index + 1}`}
               </span>
-              <button
-                type="button"
-                className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center ml-4"
-                onClick={() => deleteSubOption(index)}
-              >
-                &times;
-              </button>
+              {mainSection.subOptions.length > 1 && (
+                <button
+                  type="button"
+                  className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center ml-4"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent click from bubbling up to the header
+                    deleteSubOption(index);
+                  }}
+                >
+                  &times;
+                </button>
+              )}
             </div>
             {!subOption.isCollapsed && (
               <div className="accordion-content bg-gray-700 p-4 rounded">
-                <div className="flex gap-4 mb-4">
+                <div className="flex gap-4 mb-1">
                   <div className="flex-1">
-                    <div className="form-group mb-2">
+                    <div className="form-group mb-1">
                       <label className="block text-gray-400">Title</label>
                       <input
                         type="text"
-                        className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-800 text-white rounded"
+                        className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
                         name="title"
                         value={subOption.title}
                         onChange={(e) => handleSubInputChange(index, e)}
@@ -287,11 +292,11 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="form-group mb-2">
+                    <div className="form-group mb-1">
                       <label className="block text-gray-400">Sub Title</label>
                       <input
                         type="text"
-                        className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-800 text-white rounded"
+                        className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
                         name="subTitle"
                         value={subOption.subTitle}
                         onChange={(e) => handleSubInputChange(index, e)}
@@ -308,13 +313,13 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                   </div>
                 </div>
 
-                <div className="flex gap-4 mb-4">
+                <div className="flex gap-4 mb-1">
                   <div className="flex-1">
-                    <div className="form-group mb-2">
+                    <div className="form-group mb-1">
                       <label className="block text-gray-400">Value</label>
                       <input
                         type="text"
-                        className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-800 text-white rounded"
+                        className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
                         name="value"
                         value={subOption.value}
                         onChange={(e) => handleSubInputChange(index, e)}
@@ -330,12 +335,12 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="form-group mb-2">
+                    <div className="form-group mb-1">
                       <label className="block text-gray-400">
                         Select Category
                       </label>
                       <select
-                        className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-800 text-white rounded"
+                        className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
                         value={subOption.category}
                         onChange={(e) => handleSelectChange(index, e)}
                         onBlur={(e) =>
@@ -358,13 +363,13 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
 
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <div className="form-group mb-2">
+                    <div className="form-group mb-1">
                       <label className="block text-gray-400">
                         Lead Email To
                       </label>
                       <input
                         type="text"
-                        className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-800 text-white rounded"
+                        className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
                         name="leadEmailTo"
                         value={subOption.leadEmailTo}
                         onChange={(e) => handleSubInputChange(index, e)}
@@ -384,13 +389,13 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="form-group mb-2">
+                    <div className="form-group mb-1">
                       <label className="block text-gray-400">
                         Lead Email Cc
                       </label>
                       <input
                         type="text"
-                        className="form-control form-control-sm w-full p-2 border border-gray-600 bg-gray-800 text-white rounded"
+                        className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
                         name="leadEmailCc"
                         value={subOption.leadEmailCc}
                         onChange={(e) => handleSubInputChange(index, e)}
@@ -415,26 +420,68 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
           </div>
         ))}
         <button
-          className="btn btn-primary btn-sm bg-blue-600 text-white hover:bg-blue-700 mt-4"
+          className="flex px-2 py-1 font-semibold text-white btn-primary-custom rounded items-center"
           onClick={addSubOption}
         >
-          Add Sub Option
+          <svg
+            className="w-4 h-4 text-white font-semibold cursor-pointer hover:text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            ></path>
+          </svg>
+          Add
         </button>
       </div>
       <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white shadow-md">
         <div className="modal-footer py-2 px-4 flex justify-between">
           <button
             type="button"
-            className="btn btn-secondary btn-sm bg-gray-600 hover:bg-gray-700"
+            className="flex items-center justify-center rounded btn btn-secondary bg-gray-600 hover:bg-gray-700"
             onClick={close}
           >
+            <svg
+              className="w-6 h-6 text-white cursor-pointer hover:text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
             Close
           </button>
           <button
             type="button"
-            className="btn btn-primary btn-sm bg-blue-600 text-white hover:bg-blue-700"
+            className="flex items-center justify-center px-4 py-2 font-semibold text-white btn-primary-custom rounded "
             onClick={handleSave}
           >
+            <svg
+              className="w-6 h-6 text-white cursor-pointer hover:text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2zM7 3v4a1 1 0 001 1h8a1 1 0 001-1V3M7 10h10v11H7V10z"
+              ></path>
+            </svg>
             Save changes
           </button>
         </div>
