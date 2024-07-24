@@ -5,14 +5,28 @@ type ReactFlowNode = {
     text: string;
     options?: {
       displayText: string;
+      propertyName: string;
+      message: string;
+      fallback: string;
       subOptions: {
         title: string;
         subTitle: string;
         value: string;
-        catrgory:string;
-        leadEmailTo:String;
-        leadEmailCc:String;
+        category: string;
+        leadEmailTo: string;
+        leadEmailCc: string;
+        isCollapsed: boolean;
       }[];
+    };
+    filesData?: {
+      message: string;
+      fileType: string;
+      url: string;
+      files: object[];
+    };
+    mapData?: {
+      message: string;
+      url: string;
     };
   };
 };
@@ -36,6 +50,19 @@ type FlowEntry = {
   _id: {
     $oid: string;
   };
+  property?: string; // Added optional property
+  displayText?: string; // Added optional displayText
+  fallback?: string; // Added optional fallback
+  filesData?: {
+    message: string;
+    fileType: string;
+    url: string;
+    files: object[];
+  }; // Added optional filesData
+  mapData?: {
+    message: string;
+    url: string;
+  }; // Added optional mapData
 };
 
 type ChatbotFlow = {
@@ -68,59 +95,98 @@ function generateObjectId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
+function transformNodeToFlow(node: ReactFlowNode): FlowEntry {
+  const flowEntry: FlowEntry = {
+    flowId: node.id,
+    nextFlowId: null,
+    type: node.type,
+    content: [],
+    children: [],
+    _id: {
+      $oid: generateObjectId(),
+    },
+  };
+
+  switch (node.type) {
+    case 'start':
+    case 'message':
+      flowEntry.content = [node.data.text];
+      break;
+
+    case 'options':
+      const optionsData = node.data.options!;
+      flowEntry.content = [optionsData.message];
+      flowEntry.property = optionsData.propertyName;
+      flowEntry.displayText = optionsData.displayText;
+      flowEntry.fallback = optionsData.fallback;
+      optionsData.subOptions.forEach(option => {
+        flowEntry.children.push({
+          title: option.title,
+          subTitle: option.subTitle,
+          value: option.value,
+          leadEmailTo: option.leadEmailTo,
+          leadEmailCc: option.leadEmailCc,
+          id: `${node.id}_${option.title.replace(/\s+/g, '_')}`,
+          nextFlowId: null,
+          category: option.category,
+        });
+      });
+      break;
+
+    case 'leadForm':
+      flowEntry.content = ['Please fill out the form.'];
+      break;
+
+    case 'leadFlow':
+      flowEntry.content = ['Lead flow initiated.'];
+      break;
+
+    case 'gptHandler':
+      flowEntry.content = ['GPT handler is activated.'];
+      break;
+
+    case 'file':
+      flowEntry.content = [node.data.filesData!.message];
+      flowEntry.filesData = node.data.filesData!;
+      break;
+
+    case 'map':
+      flowEntry.content = [node.data.mapData!.message];
+      flowEntry.mapData = node.data.mapData!;
+      break;
+
+    case 'stop':
+      break;
+
+    default:
+      console.warn(`Unknown node type: ${node.type}`);
+  }
+
+  return flowEntry;
+}
+
 export function generateChatbotFlow(reactflowData: ReactFlowData): ChatbotFlow {
   const { nodes, edges } = reactflowData;
 
   const flows: FlowEntry[] = [];
   const flowMap = new Map<string, FlowEntry>();
 
-  // Create flow entries from nodes
-  nodes.forEach((node) => {
-    const flowId = node.id;
-    const flowEntry: FlowEntry = {
-      flowId,
-      nextFlowId: null,
-      type: node.type,
-      content: [],
-      children: [],
-      _id: {
-        $oid: generateObjectId(),
-      },
-    };
-
-    // Set content based on node type
-    if (node.type === "start") {
-      flowEntry.content.push(node.data.text);
-    } else if (node.type === "message") {
-      flowEntry.content.push(node.data.text);
-    } else if (node.type === "options" && node.data.options) {
-      flowEntry.content.push(node.data.options.displayText);
-      node.data.options.subOptions.forEach((option) => {
-        flowEntry.children.push({
-          title: option.title,
-          subTitle: option.subTitle,
-          value: option.value,
-          leadEmailCc: option.leadEmailTo,
-          leadEmailTo: option.leadEmailCc,
-          id: option.title.replace(/\s+/g, "").toLowerCase(),
-          nextFlowId: null, // Will be set later
-        });
-      });
-    }
-
+  nodes.forEach(node => {
+    const flowEntry = transformNodeToFlow(node);
     flows.push(flowEntry);
-    flowMap.set(flowId, flowEntry);
+    flowMap.set(node.id, flowEntry);
   });
 
-  // Set nextFlowId based on edges
-  edges.forEach((edge) => {
+  edges.forEach(edge => {
     const sourceFlow = flowMap.get(edge.source);
     const targetFlow = flowMap.get(edge.target);
-
     if (sourceFlow && targetFlow) {
       sourceFlow.nextFlowId = targetFlow.flowId;
     }
   });
+
+  const startNode = nodes.find(node => node.type === 'start')!;
+  const startFlowId = startNode.id;
 
   return {
     _id: {
@@ -137,7 +203,7 @@ export function generateChatbotFlow(reactflowData: ReactFlowData): ChatbotFlow {
       $date: new Date().toISOString(),
     },
     version: 3,
-    startFlowId: nodes.find((node) => node.type === "start")!.id,
+    startFlowId,
     flows,
     __v: 0,
     deployedAt: {

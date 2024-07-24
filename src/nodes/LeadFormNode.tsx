@@ -9,8 +9,8 @@ const LeadFormNode: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   return (
-    <div className="bg-gray-800 text-white p-4 rounded-md shadow-lg">
-      <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2">
+    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+      <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2flex justify-between items-center py-2 px-4 border-b-4 border-indigo-500">
         <h3 className="text-lg font-semibold">Lead Form</h3>
         <button
           title="Delete Lead Form Node"
@@ -20,7 +20,7 @@ const LeadFormNode: React.FC<NodeProps> = ({ data, id }) => {
           &times;
         </button>
       </div>
-      <div className="mb-4">
+      <div className="space-y-4 py-2 px-4 pb-3">
         <p>
           {data.text
             ? data.text

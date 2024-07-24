@@ -32,8 +32,8 @@ const MapNode: React.FC<NodeProps> = ({ id, data }) => {
   };
 
   return (
-    <div className="bg-gray-900 text-white p-4 rounded-md shadow-md">
-      <div className="flex justify-between items-center mb-2">
+    <div className="bg-gray-900 text-white rounded-md shadow-md">
+      <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2flex justify-between items-center py-2 px-4 border-b-4 border-indigo-500">
         <span>Google Maps</span>
         <button
           title="Delete Node"
@@ -43,7 +43,7 @@ const MapNode: React.FC<NodeProps> = ({ id, data }) => {
           &times;
         </button>
       </div>
-      <div className="custom-node-body">
+      <div className="space-y-4 py-2 px-4">
         <div className="mb-2">
           <input
             type="text"
@@ -51,18 +51,18 @@ const MapNode: React.FC<NodeProps> = ({ id, data }) => {
             onChange={(e) => handleFieldChange("message", e.target.value)}
             onBlur={(e) => handleFieldChange("message", e.target.value)}
             placeholder="Message:"
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-700 text-white"
+            className="w-full p-1 rounded-md border border-gray-600 bg-gray-700 text-white"
           />
           {errors.message && <small className="text-red-500">{errors.message}</small>}
         </div>
-        <div>
+        <div className="mb-2">
           <input
             type="text"
             value={mapData.url}
             onChange={(e) => handleFieldChange("url", e.target.value)}
             onBlur={(e) => handleFieldChange("url", e.target.value)}
             placeholder="Google Maps URL:"
-            className="w-full p-2 rounded-md border border-gray-600 bg-gray-700 text-white"
+            className="w-full p-1 rounded-md border border-gray-600 bg-gray-700 text-white"
           />
           {errors.url && <small className="text-red-500">{errors.url}</small>}
         </div>

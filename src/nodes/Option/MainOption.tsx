@@ -122,41 +122,46 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
     <>
       <div className="bg-gray-800 text-white rounded-md shadow-md ">
         <div className="flex justify-between items-center mb-2 py-2 px-4 border-b-4 border-indigo-500">
+          <strong
+            className="cursor-pointer"
+            onClick={() => setIsCollapsed(!isOptionCollapsed)}
+          >
+            Options
+          </strong>
+
           <div className="flex">
-            <strong
-              className="cursor-pointer"
-              onClick={() => setIsCollapsed(!isOptionCollapsed)}
-            >
-              Options
-            </strong>
             <button
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white mr-3"
               title="Expand"
               onClick={() => setOpen((o) => !o)}
             >
               <svg
-                className="w-6 h-6 text-blue-500 cursor-pointer hover:text-blue-700"
-                fill="none"
+                className="w-4 h-4 text-blue-500 cursor-pointer hover:text-blue-700"
+                fill="white"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 242.133 242.133"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                ></path>
+                  id="XMLID_15_"
+                  d="M227.133,83.033c8.283,0,15-6.716,15-15V15c0-8.284-6.717-15-15-15H174.1c-8.284,0-15,6.716-15,15
+	s6.716,15,15,15h16.82l-69.854,69.854L51.213,30h16.82c8.284,0,15-6.716,15-15s-6.716-15-15-15H15C6.717,0,0,6.716,0,15v53.033
+	c0,8.284,6.717,15,15,15c8.285,0,15-6.716,15-15v-16.82l69.854,69.854L30,190.92V174.1c0-8.284-6.715-15-15-15
+	c-8.283,0-15,6.716-15,15v53.033c0,8.284,6.717,15,15,15h53.033c8.284,0,15-6.716,15-15c0-8.284-6.716-15-15-15h-16.82
+	l69.854-69.854l69.854,69.854H174.1c-8.284,0-15,6.716-15,15c0,8.284,6.716,15,15,15h53.033c8.283,0,15-6.716,15-15V174.1
+	c0-8.284-6.717-15-15-15c-8.285,0-15,6.716-15,15v16.82l-69.854-69.854l69.854-69.854v16.82
+	C212.133,76.317,218.848,83.033,227.133,83.033z"
+                />
               </svg>
             </button>
+            <button
+              title="Delete Option Node"
+              className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
+              onClick={() => onDelete(id)}
+            >
+              &times;
+            </button>
           </div>
-          <button
-            title="Delete Option Node"
-            className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
-            onClick={() => onDelete(id)}
-          >
-            &times;
-          </button>
         </div>
         {!isOptionCollapsed && (
           <div className="space-y-4 py-2 px-4">

@@ -34,7 +34,6 @@ import useGlobalStore from "./services/glaboalStore";
 
 //Nodes
 import MessageNode from "./nodes/MessageNode";
-import OptionsNode from "./nodes/OptionsNode";
 import LeadFormNode from "./nodes/LeadFormNode";
 import LeadFlowNode from "./nodes/LeadFlowNode";
 import GPTHandlerNode from "./nodes/GPTHandlerNode";
@@ -49,6 +48,7 @@ import CustomEdge from "./edges/CustomEdge";
 import { saveDraft, saveVersion } from "./services/save";
 import FlowDropdown from "./component/FlowDropdown";
 import Toolbar from "./component/Toolbar"; // Import the Toolbar component
+import { saveFlowData } from "./services/server";
 
 const nodeTypes = {
   start: StartNode,
@@ -229,6 +229,7 @@ const FlowDiagram: React.FC = () => {
     const flowData = generateChatbotFlow(flow);
     saveDraft(flow);
     saveVersion(flow, flowData);
+    saveFlowData(flowData);
   };
 
   const handleNodeChange = (id: string, newData: any, nodeType: string) => {

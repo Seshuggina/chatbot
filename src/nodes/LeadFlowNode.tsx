@@ -8,12 +8,12 @@ const LeadFlowNode: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   return (
-    <div className="bg-gray-800 text-white p-4 rounded-md shadow-lg">
-      <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2">
-        <h3 className="text-lg font-semibold">Lead Flow</h3>
+    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+      <div className="flex justify-between items-center pb-2 py-2 px-4">
+        <h3 className="text-lg font-semibold mr-2">Lead Flow</h3>
         <button
           title="Delete Lead Flow Node"
-          className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
+          className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center ml-3"
           onClick={() => onDelete(id)}
         >
           &times;

@@ -154,11 +154,14 @@
 
 .react-flow__handle-top {
   top: -3px;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
 }
 .react-flow__handle-bottom {
   bottom: -3px;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
+}
+.react-flow__handle.connectionindicator {
+  outline: 2px solid #ff0073;
 }
 
 /* .react-flow__controls button {

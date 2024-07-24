@@ -9,8 +9,8 @@ const GPTHandlerNode: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   return (
-    <div className="bg-gray-800 text-white p-4 rounded-md shadow-lg">
-      <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2">
+    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+      <div className="flex justify-between items-center border-b pb-2 py-2 px-4 border-b-4 border-indigo-500">
         <h3 className="text-lg font-semibold">GPT Handler</h3>
         <button
           className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
@@ -20,7 +20,7 @@ const GPTHandlerNode: React.FC<NodeProps> = ({ data, id }) => {
           &times;
         </button>
       </div>
-      <div className="custom-node-body">
+      <div className="space-y-4 py-2 px-4 pb-3">
         <div>
           {data.text ? data.text : "From here on visitors would be handled by GPT"}
         </div>

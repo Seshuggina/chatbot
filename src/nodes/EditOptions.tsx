@@ -229,8 +229,8 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     stroke="currentColor"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
                       strokeWidth={2}
                       d="M19 9l-7 7-7-7"
                     />
@@ -244,8 +244,8 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     stroke="currentColor"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
                       strokeWidth={2}
                       d="M5 15l7-7 7 7"
                     />
