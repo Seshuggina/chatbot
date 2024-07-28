@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Option, SubOption } from "./../models/common.models";
-import { validateOptionField } from "./../services/validateOptions";
+import { Option, SubOption } from "./../../models/common.models";
+import { validateOptionField } from "./../../services/validation";
 
 interface EditOptionsOnPopUpProps {
   optionsData: Option;
@@ -108,6 +108,7 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
       subOptions: [
         ...mainSection.subOptions,
         {
+          id: "",
           title: "",
           subTitle: "",
           value: "",
@@ -135,7 +136,7 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gray-900 text-white">
+    <div className="flow-node fixed inset-0 flex flex-col bg-gray-900 text-white">
       <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white shadow-md z-10">
         <div className="modal-header p-4 flex justify-between items-center">
           <h5 className="modal-title text-lg font-bold">Edit Options</h5>
@@ -150,10 +151,10 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 pt-16 pb-20">
-        <div className="flex gap-4 mb-1">
-          <div className="flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="min-w-[200px] px-2 shadow-md">
             <div className="form-group mb-1">
-              <label className="block text-gray-400">Display Text</label>
+              <label className="input-label">Display Text</label>
               <input
                 type="text"
                 className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
@@ -167,9 +168,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               )}
             </div>
           </div>
-          <div className="flex-1">
+          <div className="min-w-[200px] px-2 shadow-md">
             <div className="form-group mb-1">
-              <label className="block text-gray-400">Property Name</label>
+              <label className="input-label">Property Name</label>
               <input
                 type="text"
                 className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
@@ -183,36 +184,38 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               )}
             </div>
           </div>
+          <div className="min-w-[200px] px-2 shadow-md">
+            <div className="form-group mb-1">
+              <label className="input-label">Message</label>
+              <input
+                type="text"
+                className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
+                name="message"
+                value={mainSection.message}
+                onChange={handleMainInputChange}
+                onBlur={(e) => handleBlur("message", e.target.value)}
+              />
+              {errors.message && (
+                <small className="text-red-500">{errors.message}</small>
+              )}
+            </div>
+          </div>
+          <div className="min-w-[200px] px-2 shadow-md">
+            <div className="form-group mb-1">
+              <label className="input-label">Fall back</label>
+              <textarea
+                className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
+                name="fallback"
+                value={mainSection.fallback}
+                onChange={handleMainInputChange}
+                onBlur={(e) => handleBlur("fallback", e.target.value)}
+              />
+              {errors.fallback && (
+                <small className="text-red-500">{errors.fallback}</small>
+              )}
+            </div>
+          </div>
         </div>
-
-        <div className="form-group mb-1">
-          <label className="block text-gray-400">Message</label>
-          <input
-            type="text"
-            className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
-            name="message"
-            value={mainSection.message}
-            onChange={handleMainInputChange}
-            onBlur={(e) => handleBlur("message", e.target.value)}
-          />
-          {errors.message && (
-            <small className="text-red-500">{errors.message}</small>
-          )}
-        </div>
-        <div className="form-group mb-1">
-          <label className="block text-gray-400">Fall back</label>
-          <textarea
-            className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
-            name="fallback"
-            value={mainSection.fallback}
-            onChange={handleMainInputChange}
-            onBlur={(e) => handleBlur("fallback", e.target.value)}
-          />
-          {errors.fallback && (
-            <small className="text-red-500">{errors.fallback}</small>
-          )}
-        </div>
-
         {mainSection.subOptions.map((subOption, index) => (
           <div key={index} className="accordion mb-2">
             <div
@@ -229,8 +232,8 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     stroke="currentColor"
                   >
                     <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       strokeWidth={2}
                       d="M19 9l-7 7-7-7"
                     />
@@ -244,8 +247,8 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                     stroke="currentColor"
                   >
                     <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       strokeWidth={2}
                       d="M5 15l7-7 7 7"
                     />
@@ -270,10 +273,10 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
             </div>
             {!subOption.isCollapsed && (
               <div className="accordion-content bg-gray-700 p-4 rounded">
-                <div className="flex gap-4 mb-1">
-                  <div className="flex-1">
-                    <div className="form-group mb-1">
-                      <label className="block text-gray-400">Title</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  <div className="min-w-[200px]">
+                    <div className="form-group">
+                      <label className="input-label">Title</label>
                       <input
                         type="text"
                         className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
@@ -291,9 +294,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       )}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="form-group mb-1">
-                      <label className="block text-gray-400">Sub Title</label>
+                  <div className="min-w-[200px]">
+                    <div className="form-group">
+                      <label className="input-label">Sub Title</label>
                       <input
                         type="text"
                         className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
@@ -311,12 +314,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       )}
                     </div>
                   </div>
-                </div>
-
-                <div className="flex gap-4 mb-1">
-                  <div className="flex-1">
-                    <div className="form-group mb-1">
-                      <label className="block text-gray-400">Value</label>
+                  <div className="min-w-[200px">
+                    <div className="form-group">
+                      <label className="input-label">Value</label>
                       <input
                         type="text"
                         className="form-control form-control-sm w-full p-1 border border-gray-600 bg-gray-800 text-white rounded"
@@ -334,9 +334,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       )}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="form-group mb-1">
-                      <label className="block text-gray-400">
+                  <div className="min-w-[200px]">
+                    <div className="form-group">
+                      <label className="input-label">
                         Select Category
                       </label>
                       <select
@@ -359,12 +359,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       )}
                     </div>
                   </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <div className="form-group mb-1">
-                      <label className="block text-gray-400">
+                  <div className="min-w-[200px]">
+                    <div className="form-group">
+                      <label className="input-label">
                         Lead Email To
                       </label>
                       <input
@@ -388,9 +385,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
                       )}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="form-group mb-1">
-                      <label className="block text-gray-400">
+                  <div className="min-w-[200px]">
+                    <div className="form-group">
+                      <label className="input-label">
                         Lead Email Cc
                       </label>
                       <input
@@ -431,9 +428,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="M12 4v16m8-8H4"
             ></path>
           </svg>
@@ -444,7 +441,7 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
         <div className="modal-footer py-2 px-4 flex justify-between">
           <button
             type="button"
-            className="flex items-center justify-center rounded btn btn-secondary bg-gray-600 hover:bg-gray-700"
+            className="flex items-center justify-center rounded btn px-2 py-2 btn-secondary bg-gray-600 hover:bg-gray-700"
             onClick={close}
           >
             <svg
@@ -455,9 +452,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
                 d="M6 18L18 6M6 6l12 12"
               ></path>
             </svg>
@@ -476,9 +473,9 @@ const EditOptionsOnPopUp: React.FC<EditOptionsOnPopUpProps> = ({
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
                 d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2zM7 3v4a1 1 0 001 1h8a1 1 0 001-1V3M7 10h10v11H7V10z"
               ></path>
             </svg>

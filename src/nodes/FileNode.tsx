@@ -3,22 +3,22 @@ import { Handle, Position, NodeProps } from "reactflow";
 import {
   validateFiles,
   validateFileNodeField,
-} from "./../services/validateOptions";
+} from "./../services/validation";
 import { isValidURLStrict } from "../services/validation";
-import "./toolStyles.css";
 
 const FileNode: React.FC<NodeProps> = ({ id, data }) => {
-  const { filesData, handleFileChange, onDelete } = data;
+  const { node, onDelete } = data;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [mimeType, setMimeType] = useState<string>("application/pdf");
 
-  const handleBlur = (field: keyof typeof filesData, value: string) => {
+  const handleBlur = (field: keyof typeof node.data, value: string) => {
     const error = validateFileNodeField(field, value);
     setErrors((prevErrors) => ({ ...prevErrors, [field]: error }));
   };
 
-  const handleFieldChange = (field: keyof typeof filesData, value: any) => {
-    const updatedFilesData = { ...filesData, [field]: value };
+  const handleFieldChange = (field: keyof typeof node.data, value: any) => {
+    const updatedFilesData = { ...node.data, [field]: value };
+    node.data = updatedFilesData;
 
     // Reset URL if files are uploaded
     if (field === "files" && value.length > 0) {
@@ -31,8 +31,7 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
       updatedFilesData.files = [];
       setErrors((prevErrors) => ({ ...prevErrors, files: "" }));
     }
-
-    handleFileChange(id, updatedFilesData);
+    node.data = updatedFilesData;
 
     if (field === "fileType") {
       const type = getAcceptType(value);
@@ -53,34 +52,8 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
     }
   };
 
-  const handleSave = () => {
-    const messageError = validateFileNodeField("message", filesData.message);
-    const urlError = isValidURLStrict(filesData.url)
-      ? ""
-      : "Please enter a valid URL";
-    const fileTypeError = validateFileNodeField("fileType", filesData.fileType);
-    const filesError =
-      filesData.url === "" &&
-      !validateFiles(filesData.files, filesData.fileType)
-        ? "Uploaded files must match the selected file type"
-        : "";
-
-    setErrors({
-      message: messageError,
-      fileType: fileTypeError,
-      files: filesError,
-      url: filesData.files.length === 0 ? urlError : "",
-    });
-
-    if (messageError || fileTypeError || filesError || urlError) {
-      return;
-    }
-
-    handleFileChange(id, filesData, "filesData");
-  };
-
   return (
-    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+    <div className="flow-node bg-gray-800 text-white rounded-md shadow-lg">
       <div className="flex justify-between items-center border-b pb-2 py-2 px-4 border-b-4 border-indigo-500">
         <span>File Upload</span>
         <button
@@ -96,7 +69,7 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
           <input
             type="text"
             placeholder="Message"
-            value={filesData.message}
+            value={node.data.message}
             onChange={(e) => handleFieldChange("message", e.target.value)}
             onBlur={(e) => handleBlur("message", e.target.value)}
             className="w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
@@ -107,7 +80,7 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
         </div>
         <div className="mb-2" title="File Type">
           <select
-            value={filesData.fileType}
+            value={node.data.fileType}
             onChange={(e) => handleFieldChange("fileType", e.target.value)}
             onBlur={(e) => handleBlur("fileType", e.target.value)}
             className="w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
@@ -123,7 +96,7 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
         <div className="mb-2">
           <label>Upload File:</label>
           <input
-            disabled={!filesData.fileType || filesData.url !== ""}
+            disabled={!node.data.fileType || node.data.url !== ""}
             type="file"
             accept={mimeType}
             multiple
@@ -140,10 +113,10 @@ const FileNode: React.FC<NodeProps> = ({ id, data }) => {
           <input
             type="text"
             placeholder="URL"
-            value={filesData.url}
+            value={node.data.url}
             onChange={(e) => handleFieldChange("url", e.target.value)}
             onBlur={(e) => handleBlur("url", e.target.value)}
-            disabled={filesData.files.length > 0}
+            disabled={node.data.files.length > 0}
             className="w-full p-1 border border-gray-600 bg-gray-700 text-white rounded"
           />
           {errors.url && <small className="text-red-500">{errors.url}</small>}

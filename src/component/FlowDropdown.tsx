@@ -7,7 +7,6 @@ interface DropdownOption {
 }
 
 const FlowDropdown = (props: any) => {
-  const selectionChange = props.selectionChange;
   const [draftOptions, setDraftOptions] = useState<DropdownOption[]>([]);
   const [versionOptions, setVersionOptions] = useState<DropdownOption[]>([]);
 

@@ -18,10 +18,10 @@ const Toolbar: React.FC<ToolbarProps> = ({ onDragStart }) => (
     </button>
     <button
       className="button"
-      onDragStart={(event) => onDragStart(event, "options")}
+      onDragStart={(event) => onDragStart(event, "option")}
       draggable
     >
-      Options
+      Option
     </button>
     <button
       className="button"

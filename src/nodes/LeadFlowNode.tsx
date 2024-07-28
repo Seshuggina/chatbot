@@ -3,12 +3,10 @@ import { Handle, Position, NodeProps } from "reactflow";
 import "tailwindcss/tailwind.css";
 
 const LeadFlowNode: React.FC<NodeProps> = ({ data, id }) => {
-  const onDelete = (id: any) => {
-    data.onDelete(id);
-  };
+  const { onDelete } = data;
 
   return (
-    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+    <div className="flow-node bg-gray-800 text-white rounded-md shadow-lg">
       <div className="flex justify-between items-center pb-2 py-2 px-4">
         <h3 className="text-lg font-semibold mr-2">Lead Flow</h3>
         <button

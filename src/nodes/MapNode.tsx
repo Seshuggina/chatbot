@@ -3,11 +3,12 @@ import { Handle, Position, NodeProps } from "reactflow";
 import { isValidURLStrict } from "../services/validation";
 
 const MapNode: React.FC<NodeProps> = ({ id, data }) => {
-  const { mapData, handleMapChange, onDelete } = data;
+  const { node, onDelete } = data;
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleFieldChange = (field: keyof typeof mapData, value: any) => {
-    let updatedMapsData = { ...mapData, [field]: value };
+  const handleFieldChange = (field: keyof typeof node.data, value: any) => {
+    let updatedMapsData = { ...node.data, [field]: value };
+    node.data = updatedMapsData;
     let newErrors: Record<string, string> = {};
 
     if (field === "message") {
@@ -28,11 +29,10 @@ const MapNode: React.FC<NodeProps> = ({ id, data }) => {
     }
     
     setErrors(newErrors);
-    handleMapChange(id, updatedMapsData);
   };
 
   return (
-    <div className="bg-gray-900 text-white rounded-md shadow-md">
+    <div className="flow-node bg-gray-900 text-white rounded-md shadow-md">
       <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-2flex justify-between items-center py-2 px-4 border-b-4 border-indigo-500">
         <span>Google Maps</span>
         <button
@@ -47,7 +47,7 @@ const MapNode: React.FC<NodeProps> = ({ id, data }) => {
         <div className="mb-2">
           <input
             type="text"
-            value={mapData.message}
+            value={node.data.message}
             onChange={(e) => handleFieldChange("message", e.target.value)}
             onBlur={(e) => handleFieldChange("message", e.target.value)}
             placeholder="Message:"
@@ -58,7 +58,7 @@ const MapNode: React.FC<NodeProps> = ({ id, data }) => {
         <div className="mb-2">
           <input
             type="text"
-            value={mapData.url}
+            value={node.data.url}
             onChange={(e) => handleFieldChange("url", e.target.value)}
             onBlur={(e) => handleFieldChange("url", e.target.value)}
             placeholder="Google Maps URL:"

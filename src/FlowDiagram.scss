@@ -1,3 +1,4 @@
+@import url("./styles/utility.scss");
 .flow-diagram {
   display: flex;
   flex-direction: row;
@@ -28,6 +29,22 @@
       overflow-y: auto;
       margin-bottom: 10px;
     }
+  }
+  .flow-node {
+    max-width: 200px;
+    min-width: 150px;
+  }
+}
+
+.popup-content,
+.flow-diagram {
+  input[type="text"] {
+    height: 28px;
+    font-size: 14px;
+  }
+  .input-label {
+    font-size: 14px;
+
   }
 }
 
@@ -64,9 +81,30 @@
   }
 }
 
+.react-flow__edge .react-flow__edge-path {
+  stroke: #ff0073;
+  strokewidth: 2;
+  stroke-opacity: 1;
+}
+/* #ff0073 */
+.react-flow__edge-path,
+.react-flow__connection-path {
+  strokewidth: 3px;
+  stroke: #ff0073;
+}
 
-.btnNone {
-  border: none;
-  background-color: none;
-  padding: none;
+.react-flow__handle-top {
+  top: -3px;
+  background-color: #ffffff !important;
+}
+.react-flow__handle-bottom {
+  bottom: -3px;
+  background-color: #ffffff !important;
+}
+.react-flow__handle.connectionindicator {
+  outline: 2px solid #ff0073;
+}
+
+.react-flow__handle {
+  background-color: #ffffff !important;
 }

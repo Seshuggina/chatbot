@@ -3,13 +3,10 @@ import { Handle, Position, NodeProps } from "reactflow";
 import 'tailwindcss/tailwind.css';
 
 const GPTHandlerNode: React.FC<NodeProps> = ({ data, id }) => {
-
-  const onDelete = (id: any) => {
-    data.onDelete(id);
-  };
+  const { onDelete } = data;
 
   return (
-    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+    <div className="flow-node bg-gray-800 text-white rounded-md shadow-lg">
       <div className="flex justify-between items-center border-b pb-2 py-2 px-4 border-b-4 border-indigo-500">
         <h3 className="text-lg font-semibold">GPT Handler</h3>
         <button
@@ -26,13 +23,8 @@ const GPTHandlerNode: React.FC<NodeProps> = ({ data, id }) => {
         </div>
       </div>
       <Handle
-        type="source"
-        position={Position.Bottom}
-        className="w-2 h-2 bg-white border-none"
-      />
-      <Handle
         type="target"
-        position={Position.Top}
+        position={Position.Left}
         className="w-2 h-2 bg-white border-none"
       />
     </div>

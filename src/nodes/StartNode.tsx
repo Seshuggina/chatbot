@@ -1,11 +1,11 @@
 import React from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import "./toolStyles.css";
 
 const StartNode: React.FC<NodeProps> = ({ data }) => {
+  const { node } = data;
   return (
-    <div className="bg-gray-800 text-white p-4 rounded-md shadow-lg">
-      <div className="custom-node-body">{data.text}</div>
+    <div className="flow-node bg-gray-800 text-white p-2 rounded-md shadow-lg">
+      <div className="custom-node-body">{node.data.text}</div>
       <Handle
         type="source"
         position={Position.Bottom}

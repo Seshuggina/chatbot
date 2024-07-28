@@ -1,21 +1,18 @@
 import React, { useState } from "react";
-import { Handle, Position, NodeProps } from "reactflow";
+import { Handle, Position } from "reactflow";
 import Popup from "reactjs-popup";
-import EditOptionsOnPopUp from "./../EditOptions";
-import {
-  Option,
-  SubOption as SubOptionType,
-} from "./../../models/common.models";
-import { validateOptionField } from "./../../services/validateOptions";
+import EditOptionsOnPopUp from "./EditOptions";
+import { Option, SubOption as SubOptionType } from "../../models/common.models";
+import { validateOptionField } from "../../services/validation";
 import SubOption from "./SubOption";
-import "./../../styles/tailwind.css"; // Make sure to import Tailwind CSS
+import "./../../styles/tailwind.css";
 
-const MainOption: React.FC<NodeProps> = ({ data, id }) => {
-  const optionData = data.options;
+const OptionNode: React.FC<any> = ({ data, id }) => {
+  const { node, onDelete } = data;
   const [open, setOpen] = useState(false);
-  const [isOptionCollapsed, setIsCollapsed] = useState(false);
+  const [isNodeCollapsed, setIsCollapsed] = useState(false);
   const [errors, setErrors] = useState<Record<string, any>>({});
-  const [options, setOptions] = useState<Option>(optionData);
+  const [currentNodeData, setNodeData] = useState<Option>(node.data);
 
   const handleBlur = (field: string, value: string) => {
     const error = validateOptionField(field, value);
@@ -44,9 +41,9 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
   };
 
   const handleInputChange = (field: keyof Option, value: string) => {
-    const newOptions = { ...options, [field]: value };
-    setOptions(newOptions);
-    data.handleChange(id, newOptions, "options");
+    const newData = { ...currentNodeData, [field]: value };
+    setNodeData(newData);
+    node.data = newData;
   };
 
   const handleSubOptionChange = (
@@ -54,15 +51,16 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
     field: keyof SubOptionType,
     value: string
   ) => {
-    const newSubOptions = [...options.subOptions];
+    const newSubOptions = [...currentNodeData.subOptions];
     newSubOptions[optionIndex][field] = value as never;
-    const newOptions = { ...options, subOptions: newSubOptions };
-    setOptions(newOptions);
-    data.handleChange(id, newOptions, "options");
+    const newData = { ...currentNodeData, subOptions: newSubOptions };
+    setNodeData(newData);
+    node.data = newData;
   };
 
   const handleAddSubOption = () => {
     const newSubOption: SubOptionType = {
+      id: "",
       title: "",
       subTitle: "",
       value: "",
@@ -72,61 +70,61 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
       isCollapsed: true,
     };
 
-    const newOptions = {
-      ...options,
-      subOptions: [...options.subOptions, newSubOption],
+    const newData = {
+      ...currentNodeData,
+      subOptions: [...currentNodeData.subOptions, newSubOption],
     };
 
-    setOptions(newOptions);
-    data.handleChange(id, newOptions, "options");
+    setNodeData(newData);
+    node.data = newData;
     setOpen(true);
   };
 
   const handleDeleteSubOption = (index: number) => {
-    const newSubOptions = options.subOptions.filter((_, i) => i !== index);
-    const newOptions = { ...options, subOptions: newSubOptions };
-    setOptions(newOptions);
-    data.handleChange(id, newOptions, "options");
+    const newSubOptions = currentNodeData.subOptions.filter(
+      (_, i) => i !== index
+    );
+    const newData = { ...currentNodeData, subOptions: newSubOptions };
+    setNodeData(newData);
+    node.data = newData;
   };
 
   const toggleSubOption = (index: number) => {
-    const newSubOptions = options.subOptions.map((subOption, i) =>
+    const newSubOptions = currentNodeData.subOptions.map((subOption, i) =>
       i === index
         ? { ...subOption, isCollapsed: !subOption.isCollapsed }
         : subOption
     );
-    setOptions({ ...options, subOptions: newSubOptions });
-    data.handleChange(id, { ...options, subOptions: newSubOptions }, "options");
+    const newData = { ...currentNodeData, subOptions: newSubOptions };
+    setNodeData(newData);
+    node.data = newData;
   };
 
-  const savedPopupData = (modifiedOptions: Option) => {
-    const updatedOptions = {
-      ...modifiedOptions,
-      subOptions: modifiedOptions.subOptions.map((sub) => ({
+  const savedPopupData = (modifiedNodeData: Option) => {
+    const updatedNodeData = {
+      ...modifiedNodeData,
+      subOptions: modifiedNodeData.subOptions.map((sub) => ({
         ...sub,
         isCollapsed: true,
       })),
     };
 
-    setOptions(updatedOptions);
-    data.handleChange(id, updatedOptions, "options");
-  };
-
-  const onDelete = (id: any) => {
-    data.onDelete(id);
+    setNodeData(updatedNodeData);
+    node.data = updatedNodeData;
   };
 
   const closeModal = () => setOpen(false);
+  const openModal = () => setOpen(true);
 
   return (
     <>
-      <div className="bg-gray-800 text-white rounded-md shadow-md ">
-        <div className="flex justify-between items-center mb-2 py-2 px-4 border-b-4 border-indigo-500">
+      <div className="flow-node bg-gray-800 text-white rounded-md shadow-md ">
+        <div className="flex justify-between items-center py-2 px-4 border-b-4 border-indigo-500">
           <strong
-            className="cursor-pointer"
-            onClick={() => setIsCollapsed(!isOptionCollapsed)}
+            className="cursor-pointer ml-3"
+            onClick={() => setIsCollapsed(!isNodeCollapsed)}
           >
-            Options
+            Option
           </strong>
 
           <div className="flex">
@@ -155,21 +153,21 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
               </svg>
             </button>
             <button
-              title="Delete Option Node"
-              className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
+              title="Delete Node"
+              className="text-white font-semibold bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
               onClick={() => onDelete(id)}
             >
               &times;
             </button>
           </div>
         </div>
-        {!isOptionCollapsed && (
+        {!isNodeCollapsed && (
           <div className="space-y-4 py-2 px-4">
             <div>
               <input
                 type="text"
                 placeholder="Display Text"
-                value={options.displayText}
+                value={currentNodeData.displayText}
                 onChange={(e) =>
                   handleInputChange("displayText", e.target.value)
                 }
@@ -184,7 +182,7 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
               <input
                 type="text"
                 placeholder="Property Name"
-                value={options.propertyName}
+                value={currentNodeData.propertyName}
                 onChange={(e) =>
                   handleInputChange("propertyName", e.target.value)
                 }
@@ -198,7 +196,7 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
             <div>
               <input
                 type="text"
-                value={options.message}
+                value={currentNodeData.message}
                 placeholder="Message"
                 onChange={(e) => handleInputChange("message", e.target.value)}
                 onBlur={(e) => handleBlur("message", e.target.value)}
@@ -211,7 +209,7 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
             <div>
               <input
                 type="text"
-                value={options.fallback}
+                value={currentNodeData.fallback}
                 placeholder="Fall back"
                 onChange={(e) => handleInputChange("fallback", e.target.value)}
                 onBlur={(e) => handleBlur("fallback", e.target.value)}
@@ -221,17 +219,14 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
                 <small className="text-red-500">{errors.fallback}</small>
               )}
             </div>
-            {options.subOptions.map((subOption, index) => (
+            {currentNodeData.subOptions.map((subOption, index) => (
               <SubOption
                 key={index}
                 subOption={subOption}
                 index={index}
-                errors={errors.subOptions?.[index] || {}}
-                onBlur={handleSubOptionBlur}
-                onChange={handleSubOptionChange}
                 onDelete={handleDeleteSubOption}
-                toggleSubOption={toggleSubOption}
-                length={options.subOptions.length}
+                length={currentNodeData.subOptions.length}
+                expandToEdit={openModal}
               />
             ))}
             <button
@@ -246,9 +241,9 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   d="M12 4v16m8-8H4"
                 ></path>
               </svg>
@@ -256,13 +251,12 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
             </button>
           </div>
         )}
-        <Handle type="source" position={Position.Bottom} />
-        <Handle type="target" position={Position.Top} />
+        <Handle type="target" position={Position.Top} id={id} />
       </div>
       <Popup open={open} closeOnDocumentClick onClose={closeModal}>
         <EditOptionsOnPopUp
           save={savedPopupData}
-          optionsData={options}
+          optionsData={currentNodeData}
           close={closeModal}
         />
       </Popup>
@@ -270,4 +264,4 @@ const MainOption: React.FC<NodeProps> = ({ data, id }) => {
   );
 };
 
-export default MainOption;
+export default OptionNode;

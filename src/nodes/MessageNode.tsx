@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import "./toolStyles.css";
-import "./../styles/node.scss";
 
-const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
-  const [text, setText] = useState(data.text);
+const MessageNode: React.FC<NodeProps> = ({ data }) => {
+  const { node, onDelete } = data;
+  const [text, setText] = useState(node.data.text);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleDoubleClick = () => {
@@ -14,30 +13,25 @@ const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newText = event.target.value;
     setText(newText);
-    data.handleChange(id, newText);
+    node.data.text = newText;
   };
 
   const handleBlur = () => {
     setIsEditing(false);
   };
-
-  const onDelete = (id: any) => {
-    data.onDelete(id);
-  };
-
   return (
-    <div className="bg-gray-800 text-white rounded-md shadow-lg">
+    <div className="flow-node bg-gray-800 text-white rounded-md shadow-lg">
       <div className="flex justify-between items-center border-b pb-2 py-2 px-4 border-b-4 border-indigo-500">
         <span>Message</span>
         <button
           className="text-white bg-red-500 hover:bg-red-700 rounded-full h-6 w-6 flex items-center justify-center"
           title="Delete Message Node"
-          onClick={() => onDelete(id)}
+          onClick={() => onDelete(node.id)}
         >
           &times;
         </button>
       </div>
-      <div className="space-y-4 py-2 px-4 pb-3">
+      <div className="space-y-4 py-2 px-4 pb-3 min-w-36">
         {isEditing ? (
           <input
             value={text}
@@ -52,16 +46,17 @@ const MessageNode: React.FC<NodeProps> = ({ data, id }) => {
             onDoubleClick={handleDoubleClick}
           >
             {text ? text : "Enter your message"}
-
-            <svg
-              className="w-4 h-4 text-white cursor-pointer hover:text-white ml-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M7.127 22.562l-7.127 1.438 1.438-7.128 5.689 5.69zm1.414-1.414l11.228-11.225-5.69-5.692-11.227 11.227 5.689 5.69zm9.768-21.148l-2.816 2.817 5.691 5.691 2.816-2.819-5.691-5.689z" />
-            </svg>
+            <div onClick={handleDoubleClick}>
+              <svg
+                className="w-4 h-4 text-white cursor-pointer hover:text-white ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M7.127 22.562l-7.127 1.438 1.438-7.128 5.689 5.69zm1.414-1.414l11.228-11.225-5.69-5.692-11.227 11.227 5.689 5.69zm9.768-21.148l-2.816 2.817 5.691 5.691 2.816-2.819-5.691-5.689z" />
+              </svg>
+            </div>
           </div>
         )}
       </div>

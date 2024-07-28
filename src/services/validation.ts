@@ -81,7 +81,7 @@ export const validateFileNode = (filesData: any): Record<string, string> => {
     errors.message = "Message must be between 3 and 500 characters";
   }
 
-  const isValidUrl = filesData.url && isValidURLStrict(filesData.url);
+  const isValidUrl = filesData.url && isValidURL(filesData.url);
   const hasValidFiles =
     filesData.files && validateFiles(filesData.files, filesData.fileType);
 
@@ -107,7 +107,7 @@ export const validateMapNode = (mapData: any): Record<string, string> => {
     errors.message = "Message must be between 3 and 500 characters";
   }
 
-  if (!mapData.url || !isValidURLStrict(mapData.url)) {
+  if (!mapData.url || !isValidURL(mapData.url)) {
     errors.url = "URL must be valid";
   }
 
@@ -157,4 +157,87 @@ export const isValidURLStrict = (url: string) => {
     "i" // fragment locator
   );
   return strictPattern.test(url);
+};
+
+
+export const validateOptionField = (field: string, value: string): string => {
+  switch (field) {
+    case "displayText":
+      if (!value) return "Display Text is required";
+      if (value.length < 3) return "Display Text must be at least 3 characters";
+      if (value.length > 50)
+        return "Display Text must be at most 50 characters";
+      break;
+    case "propertyName":
+      if (!value) return "Property Name is required";
+      if (value.length < 3)
+        return "Property Name must be at least 3 characters";
+      if (value.length > 50)
+        return "Property Name must be at most 50 characters";
+      break;
+    case "message":
+      if (!value) return "Message is required";
+      if (value.length < 3) return "Message must be at least 3 characters";
+      if (value.length > 500) return "Message must be at most 500 characters";
+      break;
+
+    case "fallback":
+      if (!value) return "Fall back is required";
+      if (value.length < 3) return "Fall Back must be at least 3 characters";
+      if (value.length > 50) return "Fall back must be at most 50 characters";
+      break;
+
+    case "title":
+      if (!value) return "Title is required";
+      if (value.length < 3) return "Title must be at least 3 characters";
+      if (value.length > 50) return "Title must be at most 50 characters";
+      break;
+    case "subTitle":
+      if (!value) return "Sub Title is required";
+      if (value.length < 3) return "Sub Title must be at least 3 characters";
+      if (value.length > 50) return "Sub Title must be at most 50 characters";
+      break;
+    case "value":
+      if (!value) return "Value is required";
+      if (value.length < 3) return "Value must be at least 3 characters";
+      if (value.length > 500) return "Value must be at most 500 characters";
+      break;
+    case "category":
+      if (!value) return "Value is required";
+      break;
+    case "leadEmailTo":
+      if (!value) return "Lead Email To is required";
+      if (!/\S+@\S+\.\S+/.test(value)) return "Lead Email To is invalid";
+      break;
+    case "leadEmailCc":
+      if (value && !/\S+@\S+\.\S+/.test(value))
+        return "Lead Email CC is invalid";
+      break;
+    default:
+      break;
+  }
+  return "";
+};
+
+export const validateFileNodeField = (field: any, value: string): string => {
+  switch (field) {
+    case "message":
+      if (!value) return "Message is required";
+      if (value.length < 3) return "Message must be at least 3 characters";
+      if (value.length > 500) return "Message must be at most 500 characters";
+      break;
+    case "fileType":
+      if (!value) return "File Type is required";
+      break;
+    case "files":
+      if (!value || value.length === 0)
+        return "At least one file must be uploaded";
+      break;
+    case "url":
+      if (!value) return "URL is required if no files are uploaded";
+      break;
+    default:
+      return "";
+  }
+  return "";
 };

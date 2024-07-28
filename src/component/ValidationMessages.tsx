@@ -12,7 +12,7 @@ const ValidationMessages: React.FC<ValidationMessagesProps> = ({
   return (
     <>
       {Object.entries(messages).map(([key, value]) => (
-        <p key={key}>
+        <p key={key} className="col-span-full text-red-600">
           <strong>{key}:</strong> {value}
         </p>
       ))}

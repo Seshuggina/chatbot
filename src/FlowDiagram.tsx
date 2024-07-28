@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import ReactFlow, {
   addEdge,
   applyNodeChanges,
@@ -17,7 +17,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import "./styles/button.scss";
-import "./App.scss";
+import "./FlowDiagram.scss";
 import {
   validateOptions,
   validateFileNode,
@@ -41,7 +41,7 @@ import StopNode from "./nodes/StopNode";
 import StartNode from "./nodes/StartNode";
 import FileNode from "./nodes/FileNode";
 import MapNode from "./nodes/MapNode";
-import MainOption from "./nodes/Option/MainOption";
+import OptionNode from "./nodes/Option/OptionNode";
 
 //Edges
 import CustomEdge from "./edges/CustomEdge";
@@ -49,11 +49,12 @@ import { saveDraft, saveVersion } from "./services/save";
 import FlowDropdown from "./component/FlowDropdown";
 import Toolbar from "./component/Toolbar"; // Import the Toolbar component
 import { saveFlowData } from "./services/server";
+import { getId } from "./services/utilities";
 
 const nodeTypes = {
   start: StartNode,
   message: MessageNode,
-  options: MainOption,
+  option: OptionNode,
   leadForm: LeadFormNode,
   leadFlow: LeadFlowNode,
   gptHandler: GPTHandlerNode,
@@ -68,28 +69,13 @@ const edgeTypes = {
 
 const initialNodes: Node[] = [
   {
-    id: "1",
+    id: getId(),
     type: "start",
     data: { text: "Welcome to LivServ" },
     position: { x: 250, y: 5 },
   },
 ];
-
 const FlowDiagram: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -134,58 +120,48 @@ const FlowDiagram: React.FC = () => {
       };
 
       const newNode: Node = {
-        id: (nodes.length + 1).toString(),
+        id: getId(),
         type,
         position,
         data: { text: "" }, // Default data for all nodes
-
-        // Set data field based on type
-        ...(type === "options" && {
+        // Option NOde
+        ...(type === "option" && {
           data: {
-            text: "",
-            options: {
-              displayText: "",
-              propertyName: "",
-              message: "",
-              fallback: "",
-              subOptions: [
-                {
-                  title: "",
-                  subTitle: "",
-                  value: "",
-                  leadEmailTo: "",
-                  leadEmailCc: "",
-                  category: "",
-                  isCollapsed: true,
-                },
-              ],
-            },
+            displayText: "",
+            propertyName: "",
+            message: "",
+            fallback: "",
+            subOptions: [
+              {
+                id: getId(),
+                title: "",
+                subTitle: "",
+                value: "",
+                leadEmailTo: "",
+                leadEmailCc: "",
+                category: "",
+                isCollapsed: true,
+              },
+            ],
           },
         }),
-
+        // File Node
         ...(type === "file" && {
           data: {
-            text: "",
-            filesData: {
-              message: "",
-              fileType: "pdf",
-              url: "",
-              files: [],
-            },
+            message: "",
+            fileType: "pdf",
+            url: "",
+            files: [],
           },
         }),
-
+        // Map Node
         ...(type === "map" && {
           data: {
-            text: "",
-            mapData: {
-              message: "",
-              url: "",
-            },
+            message: "",
+            url: "",
           },
         }),
       };
-
       setNodes((nds) => nds.concat(newNode));
     },
     [nodes]
@@ -203,14 +179,14 @@ const FlowDiagram: React.FC = () => {
     let allErrors: Record<string, string> = {};
 
     for (const nodeDetails of nodes) {
-      if (nodeDetails.type === "options") {
-        const errors = validateOptions(nodeDetails.data.options);
+      if (nodeDetails.type === "option") {
+        const errors = validateOptions(nodeDetails.data);
         allErrors = { ...allErrors, ...errors };
       } else if (nodeDetails.type === "file") {
-        const errors = validateFileNode(nodeDetails.data.filesData);
+        const errors = validateFileNode(nodeDetails.data);
         allErrors = { ...allErrors, ...errors };
       } else if (nodeDetails.type === "map") {
-        const errors = validateMapNode(nodeDetails.data.mapData);
+        const errors = validateMapNode(nodeDetails.data);
         allErrors = { ...allErrors, ...errors };
       }
     }
@@ -232,17 +208,16 @@ const FlowDiagram: React.FC = () => {
     saveFlowData(flowData);
   };
 
-  const handleNodeChange = (id: string, newData: any, nodeType: string) => {
+  const handleNodeChange = (newNode: Node) => {
     resetFlags();
     const updatedNodes = nodes.map((node) => {
-      if (node.id === id) {
+      if (node.id === newNode.id) {
+        console.log("node", node);
+        debugger;
         return {
           ...node,
           data: {
-            ...node.data,
-            ...(nodeType === "options"
-              ? { options: newData }
-              : { text: newData }),
+            ...newNode.data,
           },
         };
       }
@@ -251,44 +226,6 @@ const FlowDiagram: React.FC = () => {
     setNodes(updatedNodes);
     console.log("updated Nodes", nodes);
   };
-
-  const handleFileChange = useCallback((id: string, files: File[]) => {
-    resetFlags();
-    console.log("files", files);
-
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === id) {
-          node.data = {
-            ...node.data,
-            filesData: {
-              ...files,
-            },
-          };
-        }
-        return node;
-      })
-    );
-  }, []);
-
-  const handleMapChange = useCallback((id: string, newData: any) => {
-    resetFlags();
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === id) {
-          console.log("nodenode Maps", node);
-
-          node.data = {
-            ...node.data,
-            mapData: {
-              ...newData,
-            },
-          };
-        }
-        return node;
-      })
-    );
-  }, []);
 
   const handleDeleteNode = (id: string) => {
     resetFlags();
@@ -349,11 +286,10 @@ const FlowDiagram: React.FC = () => {
               nodes={nodes.map((node) => ({
                 ...node,
                 data: {
-                  ...node.data,
+                  node: node,
+                  nodes: nodes,
                   handleChange: handleNodeChange,
                   onDelete: handleDeleteNode,
-                  handleFileChange: handleFileChange,
-                  handleMapChange: handleMapChange,
                 },
               }))}
               edges={edges}
@@ -364,7 +300,7 @@ const FlowDiagram: React.FC = () => {
               edgeTypes={edgeTypes}
               onNodesDelete={onNodesDelete}
             >
-              <MiniMap />
+
               <Controls />
               <Background />
             </ReactFlow>
@@ -389,18 +325,19 @@ const FlowDiagram: React.FC = () => {
         </div>
 
         {showErrors && (
-          <div className="alert alert-danger alert-close" role="alert">
-            <button
-              data-dismiss="alert"
-              aria-label="close"
-              title="close"
-              onClick={() => setShowErrors(false)}
-            >
-              &times;
-            </button>
-
-            <ValidationMessages messages={errors} />
-          </div>
+          <div className="bg-red-100 p-3" role="alert">
+          <button
+            className="col-span-full text-red-600 hover:text-red-800 transition duration-150 ease-in-out"
+            aria-label="close"
+            title="close"
+            onClick={() => setShowErrors(false)}
+          >
+            &times;
+          </button>
+        
+          <ValidationMessages messages={errors} />
+        </div>
+        
         )}
       </div>
     </>
